@@ -1,17 +1,36 @@
 import { useLocation } from "wouter";
 import { ArrowLeft } from "lucide-react";
+import { LayerLogo } from "@/components/layer/LayerLogo";
 
 export default function NotFound() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "transparent", position: "relative", zIndex: 1 }}>
-      <div className="text-center">
-        <p className="text-[80px] font-black leading-none mb-2" style={{ color: "rgba(37,99,235,0.15)" }}>404</p>
-        <p className="text-[16px] font-bold" style={{ color: "#fafafa" }}>Page not found</p>
-        <p className="text-[13px] mb-8" style={{ color: "#71717a" }}>The page you're looking for doesn't exist or has been moved.</p>
-        <button onClick={() => setLocation("/")} className="text-[13px] px-6 py-2.5 rounded-xl font-semibold inline-flex items-center gap-2 gentle-animation hover:scale-105" style={{ backgroundColor: "var(--accent-blue)", color: "#fff" }}>
-          <ArrowLeft className="w-4 h-4" /> Go Home
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--bone)", color: "var(--ink)" }}>
+      <div style={{ textAlign: "center", maxWidth: 480, padding: "0 2rem" }}>
+        <a className="layer-logo" onClick={() => setLocation("/")} style={{ cursor: "pointer", marginBottom: "2rem", display: "inline-flex" }}>
+          <LayerLogo />
+        </a>
+        <p
+          style={{
+            fontSize: "clamp(5rem, 14vw, 9rem)",
+            fontWeight: 600,
+            letterSpacing: "-0.05em",
+            lineHeight: 0.9,
+            color: "var(--ink)",
+            marginBottom: "0.5rem",
+          }}
+        >
+          4<span className="it" style={{ color: "var(--coral)" }}>0</span>4
+        </p>
+        <p style={{ fontSize: "var(--t-3)", fontWeight: 600, marginBottom: "0.75rem", letterSpacing: "-0.025em" }}>
+          Page <span className="it">not found.</span>
+        </p>
+        <p style={{ color: "var(--ink-3)", fontSize: "1rem", marginBottom: "2rem", lineHeight: 1.55 }}>
+          The page you're looking for doesn't exist or has been moved.
+        </p>
+        <button className="btn btn-ink btn-lg" onClick={() => setLocation("/")}>
+          <ArrowLeft className="w-4 h-4" /> Go home
         </button>
       </div>
     </div>

@@ -63,3 +63,20 @@ CREATOR_CHUNK_SIZE = 1500
 CREATOR_CHUNK_OVERLAP = 150
 SCRAPE_USER_AGENT = "LayerOn/1.0 (+https://layeron.ai)"
 SCRAPE_TIMEOUT_SECONDS = 25
+
+# ---- Async task queue (Celery + Redis) -----------------------------------
+# Set REDIS_URL to the broker; CELERY_RESULT_BACKEND defaults to the same DB.
+# For local development without Redis, set CELERY_TASK_ALWAYS_EAGER=true and
+# tasks run synchronously inside the calling process (no worker required).
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", REDIS_URL)
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", REDIS_URL)
+CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER", "false").lower() in ("1", "true", "yes")
+
+# How often the beat scheduler should look for stale sources (seconds).
+RESYNC_BEAT_INTERVAL_SECONDS = int(os.getenv("RESYNC_BEAT_INTERVAL_SECONDS", "3600"))
+# Sources older than this are eligible for auto re-sync.
+RESYNC_STALE_AFTER_SECONDS = int(os.getenv("RESYNC_STALE_AFTER_SECONDS", str(24 * 60 * 60)))
+# Hard ceiling for a single sync task.
+SYNC_TASK_TIME_LIMIT_SECONDS = int(os.getenv("SYNC_TASK_TIME_LIMIT_SECONDS", "1800"))
+SYNC_TASK_SOFT_TIME_LIMIT_SECONDS = int(os.getenv("SYNC_TASK_SOFT_TIME_LIMIT_SECONDS", "1500"))

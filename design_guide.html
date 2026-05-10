@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LayerOn — AI guided by people who actually do the work</title>
+<meta name="description" content="A marketplace of AI modules built by domain experts. Talk to a 12-year commercial lawyer, not a foundation model. A sports-medicine doctor, not an AI summary.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital,wght@0,400;1,400&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ==================================================================
+   LAYERON — END-TO-END SITE
+   The stack is the metaphor. Layers build, never overlap, always read.
+   Inspirations: Litmus (run-together type, dense confidence) ·
+   Mercor (monochrome restraint) · Phia (sophisticated dark) ·
+   Linktree (chromatic accent) · Rhode (cream warmth) ·
+   Surfshark (acid signature) · Cal AI (modern sleek)
+   ================================================================== */
+
+:root {
+  --bone: #EDE9E0;
+  --bone-light: #F4F1EA;
+  --bone-deep: #DDD7C8;
+  --bone-edge: #C9C2B0;
+  --ink: #0E1628;
+  --ink-2: #1F2A44;
+  --ink-3: #4A5468;
+  --ink-4: #8089A0;
+
+  --acid: #D4FF3A;
+  --acid-deep: #ABD124;
+  --acid-soft: #F4FFC9;
+
+  --coral: #FF7A5C;
+  --coral-soft: #FFE3DA;
+  --sage: #7A9171;
+  --sage-soft: #E2EADD;
+  --plum: #4A2D52;
+  --gold: #E0A23B;
+
+  --font-serif: 'Instrument Serif', 'Times New Roman', serif;
+  --font-sans: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Geist Mono', 'SF Mono', monospace;
+
+  --t-0: clamp(0.8125rem, 0.78rem + 0.15vw, 0.875rem);
+  --t-1: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
+  --t-2: clamp(1.125rem, 1.05rem + 0.3vw, 1.375rem);
+  --t-3: clamp(1.5rem, 1.35rem + 0.7vw, 2rem);
+  --t-4: clamp(2rem, 1.7rem + 1.5vw, 3.25rem);
+  --t-5: clamp(3rem, 2.4rem + 3vw, 5rem);
+  --t-6: clamp(3.5rem, 2.8rem + 3.8vw, 6.5rem);
+
+  --r-1: 4px;
+  --r-2: 8px;
+  --r-3: 12px;
+  --r-4: 16px;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-elastic: cubic-bezier(0.34, 1.6, 0.64, 1);
+  --ease-snap: cubic-bezier(0.83, 0, 0.17, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bone);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--t-1);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  font-feature-settings: 'ss01', 'ss02', 'cv11';
+}
+::selection { background: var(--acid); color: var(--ink); }
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* ====== Container / layout ====== */
+.container {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  position: relative;
+}
+@media (max-width: 600px) { .container { padding: 0 1.25rem; } }
+
+section {
+  padding: 7rem 0;
+  position: relative;
+}
+@media (max-width: 768px) { section { padding: 4.5rem 0; } }
+
+.divider {
+  border-bottom: 1px solid var(--bone-edge);
+}
+
+/* ====== NAV ====== */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(237, 233, 224, 0.78);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--bone-edge);
+}
+.nav-inner {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 0.85rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+@media (max-width: 600px) { .nav-inner { padding: 0.85rem 1.25rem; } }
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--ink);
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.logo-mark {
+  width: 24px;
+  height: 24px;
+}
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+  font-size: var(--t-0);
+}
+.nav-links a {
+  color: var(--ink-3);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  transition: color 0.2s var(--ease);
+}
+.nav-links a:hover { color: var(--ink); }
+@media (max-width: 860px) { .nav-links { display: none; } }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* ====== Buttons ====== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.7rem 1.1rem;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  border-radius: var(--r-2);
+  border: 1px solid transparent;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease), border-color 0.2s var(--ease);
+  white-space: nowrap;
+  will-change: transform;
+}
+.btn-lg {
+  padding: 0.95rem 1.5rem;
+  font-size: 0.95rem;
+}
+.btn-acid {
+  background: var(--acid);
+  color: var(--ink);
+  font-weight: 600;
+}
+.btn-acid:hover { background: var(--acid-deep); }
+.btn-ink {
+  background: var(--ink);
+  color: var(--bone);
+}
+.btn-ink:hover { background: var(--ink-2); }
+.btn-outline {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--bone-edge);
+}
+.btn-outline:hover { border-color: var(--ink); background: var(--bone-deep); }
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+  padding: 0.6rem 0;
+}
+.btn-ghost:hover { color: var(--coral); }
+.btn .arrow {
+  display: inline-block;
+  transition: transform 0.3s var(--ease);
+}
+.btn:hover .arrow { transform: translateX(3px); }
+
+/* ====== Eyebrow / labels ====== */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-4);
+  margin-bottom: 1.25rem;
+}
+.eyebrow .num {
+  color: var(--ink);
+  font-weight: 600;
+}
+.eyebrow::before {
+  content: '';
+  width: 16px;
+  height: 1px;
+  background: var(--ink-4);
+}
+
+/* ====== Headings ====== */
+h1, h2, h3, h4 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+  color: var(--ink);
+}
+h2 { font-size: var(--t-5); margin-bottom: 1.25rem; }
+h3 { font-size: var(--t-3); }
+h4 { font-size: var(--t-2); letter-spacing: -0.02em; line-height: 1.15; }
+
+.it {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+
+.lead {
+  font-size: var(--t-2);
+  color: var(--ink-3);
+  line-height: 1.45;
+  max-width: 56ch;
+}
+
+/* ============================================================
+   HERO — the stack metaphor visualized
+   ============================================================ */
+.hero {
+  position: relative;
+  padding: 4rem 0 6rem;
+  overflow: hidden;
+}
+@media (max-width: 768px) { .hero { padding: 2.5rem 0 4rem; } }
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  min-height: 620px;
+}
+@media (max-width: 1000px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    min-height: auto;
+  }
+}
+
+.hero-trust {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-3);
+  padding: 0.4rem 0.85rem 0.4rem 0.4rem;
+  background: var(--bone-light);
+  border: 1px solid var(--bone-edge);
+  border-radius: 999px;
+  margin-bottom: 2rem;
+}
+.hero-trust .badge {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--acid);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+
+.hero-title {
+  font-size: var(--t-6);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+  font-weight: 600;
+  color: var(--ink);
+  max-width: 14ch;
+}
+.hero-title .it {
+  color: var(--ink);
+}
+.hero-title .ac {
+  background: var(--acid);
+  padding: 0 0.18em 0.05em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.hero-q {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--t-3);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--ink-3);
+  margin-top: 1.75rem;
+  max-width: 26ch;
+}
+
+.hero-sub {
+  font-size: var(--t-2);
+  color: var(--ink-3);
+  line-height: 1.45;
+  max-width: 42ch;
+  margin-top: 1.75rem;
+}
+.hero-sub strong { color: var(--ink); font-weight: 500; }
+
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 2.25rem;
+}
+
+/* ====== HERO STACK VISUAL (the centerpiece) ====== */
+.stack-stage {
+  position: relative;
+  height: 620px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 2000px;
+}
+@media (max-width: 1000px) { .stack-stage { height: 540px; } }
+@media (max-width: 600px) { .stack-stage { height: 480px; } }
+
+.stack {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s var(--ease);
+}
+
+.layer {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 92%;
+  border-radius: 14px;
+  background: var(--bone-light);
+  border: 1px solid var(--bone-edge);
+  padding: 1rem 1.1rem;
+  font-family: var(--font-sans);
+  transform-style: preserve-3d;
+  transition: transform 0.7s var(--ease), opacity 0.6s var(--ease);
+  box-shadow: 0 30px 60px -25px rgba(14, 22, 40, 0.15);
+}
+
+.layer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.7rem;
+}
+.layer-tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: var(--ink-4);
+}
+.layer-meta {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--bone-edge);
+  color: var(--ink-4);
+}
+.layer-line {
+  font-size: 0.78rem;
+  color: var(--ink-3);
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  border-top: 1px dashed var(--bone-edge);
+}
+.layer-line:first-of-type { border-top: none; padding-top: 0; }
+.layer-line::before {
+  content: '';
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--ink-4);
+  flex-shrink: 0;
+}
+
+/* The four layers, hand-positioned in the stack */
+.layer-1 {
+  /* Foundation model — bottom, faded */
+  transform: translate(-50%, -50%) translateZ(-180px) translateY(140px) rotateX(15deg);
+  background: var(--bone-deep);
+  opacity: 0.85;
+}
+.layer-2 {
+  /* + Domain knowledge */
+  transform: translate(-50%, -50%) translateZ(-90px) translateY(60px) rotateX(15deg);
+  background: var(--bone-light);
+}
+.layer-3 {
+  /* + Expert training */
+  transform: translate(-50%, -50%) translateZ(0) translateY(-20px) rotateX(15deg);
+  background: var(--bone-light);
+}
+.layer-4 {
+  /* The LayerOn module — top, vibrant */
+  transform: translate(-50%, -50%) translateZ(120px) translateY(-110px) rotateX(15deg);
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bone);
+  box-shadow:
+    0 40px 80px -20px rgba(14, 22, 40, 0.4),
+    0 0 0 6px rgba(212, 255, 58, 0.12);
+}
+.layer-4 .layer-tag { color: var(--acid); }
+.layer-4 .layer-line { color: rgba(244, 241, 234, 0.85); border-top-color: rgba(244, 241, 234, 0.15); }
+.layer-4 .layer-line::before { background: var(--acid); }
+.layer-4 .layer-meta {
+  color: var(--ink);
+  background: var(--acid);
+  border-color: var(--acid);
+  font-weight: 600;
+}
+
+/* The expert response card on top of layer 4 */
+.layer-4-chat {
+  margin-top: 0.55rem;
+  background: var(--bone);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(212, 255, 58, 0.3);
+}
+.chat-q {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  margin-bottom: 0.4rem;
+}
+.chat-a {
+  font-size: 0.78rem;
+  color: var(--ink);
+  line-height: 1.5;
+}
+.chat-a b {
+  background: var(--acid);
+  padding: 0 3px;
+  font-weight: 500;
+  border-radius: 2px;
+}
+
+.layer-author {
+  margin-top: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.layer-author .av {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--acid);
+  color: var(--ink);
+  font-size: 0.6rem;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.layer-author .nm { font-size: 0.72rem; color: rgba(244,241,234,0.8); }
+.layer-author .nm strong { color: var(--bone); font-weight: 500; }
+
+/* Stack hover: separate layers slightly */
+.stack-stage:hover .stack {
+  transform: rotateX(-2deg) rotateY(-3deg);
+}
+.stack-stage:hover .layer-1 { transform: translate(-50%, -50%) translateZ(-220px) translateY(180px) rotateX(15deg); }
+.stack-stage:hover .layer-2 { transform: translate(-50%, -50%) translateZ(-110px) translateY(80px) rotateX(15deg); }
+.stack-stage:hover .layer-3 { transform: translate(-50%, -50%) translateZ(20px) translateY(-30px) rotateX(15deg); }
+.stack-stage:hover .layer-4 { transform: translate(-50%, -50%) translateZ(160px) translateY(-150px) rotateX(15deg); }
+
+/* Connector lines between layers (decorative) */
+.stack-side-label {
+  position: absolute;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+  color: var(--ink-4);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.stack-side-label .num {
+  color: var(--ink); font-weight: 600;
+  margin-right: 0.5rem;
+}
+.label-l1 { left: 0; bottom: 8%; }
+.label-l4 { right: 0; top: 8%; text-align: right; }
+
+/* ====== Ticker ====== */
+.ticker {
+  background: var(--ink);
+  color: var(--bone);
+  padding: 1.2rem 0;
+  overflow: hidden;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+.ticker-track {
+  display: inline-block;
+  white-space: nowrap;
+  animation: tick 50s linear infinite;
+  will-change: transform;
+}
+.ticker-track .name {
+  display: inline-block;
+  margin-right: 2.5rem;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.4rem;
+  color: var(--bone);
+}
+.ticker-track .name::before {
+  content: '✦';
+  color: var(--acid);
+  font-style: normal;
+  margin-right: 2.5rem;
+  font-size: 0.85rem;
+  vertical-align: middle;
+}
+.ticker-track .role {
+  font-family: var(--font-mono);
+  font-style: normal;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(244, 241, 234, 0.55);
+  margin-left: 0.6rem;
+}
+@keyframes tick {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.ticker:hover .ticker-track { animation-play-state: paused; }
+
+/* ============================================================
+   "WHAT IT IS" — three columns of dense copy (Mercor)
+   ============================================================ */
+.what-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 3rem;
+  margin-top: 3.5rem;
+}
+@media (max-width: 900px) { .what-grid { grid-template-columns: 1fr; gap: 2rem; } }
+
+.what-col h4 {
+  margin-bottom: 0.85rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.what-col p {
+  color: var(--ink-3);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+.what-col p strong { color: var(--ink); font-weight: 500; }
+
+/* ============================================================
+   FIVE LAYERS — Litmus-inspired numbered methodology
+   ============================================================ */
+.five-title {
+  font-size: var(--t-5);
+  font-weight: 600;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+  margin-bottom: 0.5rem;
+}
+/* The Litmus run-together signature move */
+.runon {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  letter-spacing: -0.05em;
+}
+
+.five-grid {
+  margin-top: 4rem;
+}
+.five-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 2fr;
+  gap: 2.5rem;
+  padding: 2rem 0;
+  border-top: 1px solid var(--bone-edge);
+  align-items: start;
+}
+.five-row:last-child { border-bottom: 1px solid var(--bone-edge); }
+@media (max-width: 800px) {
+  .five-row { grid-template-columns: 1fr; gap: 0.75rem; }
+}
+.five-num {
+  font-family: var(--font-sans);
+  font-size: 2rem;
+  font-weight: 300;
+  font-feature-settings: 'tnum';
+  color: var(--ink-4);
+  letter-spacing: -0.03em;
+}
+.five-row h4 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+}
+.five-row p {
+  color: var(--ink-3);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+/* ============================================================
+   COLOR / CATEGORY SYSTEM
+   ============================================================ */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin-top: 3rem;
+}
+.cat-card {
+  border-radius: var(--r-3);
+  padding: 1.5rem 1.25rem;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: transform 0.4s var(--ease-elastic);
+  position: relative;
+  overflow: hidden;
+}
+.cat-card:hover { transform: translateY(-4px); }
+.cat-acid { background: var(--acid); color: var(--ink); }
+.cat-coral { background: var(--coral); color: var(--ink); }
+.cat-sage { background: var(--sage); color: var(--bone-light); }
+.cat-plum { background: var(--plum); color: var(--bone-light); }
+.cat-gold { background: var(--gold); color: var(--ink); }
+.cat-name {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  opacity: 0.7;
+}
+.cat-domain {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+.cat-hex {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  opacity: 0.65;
+}
+.cat-count {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  display: flex;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  border-top: 1px solid currentColor;
+  opacity: 0.65;
+}
+
+/* ============================================================
+   MODULE BROWSER
+   ============================================================ */
+.browser-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.filter-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.filter-chip {
+  padding: 0.5rem 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 999px;
+  background: var(--bone-light);
+  border: 1px solid var(--bone-edge);
+  color: var(--ink-3);
+  transition: all 0.2s var(--ease);
+}
+.filter-chip:hover { border-color: var(--ink); color: var(--ink); }
+.filter-chip.active { background: var(--ink); color: var(--bone); border-color: var(--ink); }
+
+.modules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  perspective: 1200px;
+}
+.module {
+  background: var(--bone-light);
+  border: 1px solid var(--bone-edge);
+  border-radius: var(--r-3);
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.4s var(--ease), border-color 0.3s var(--ease);
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.module:hover {
+  border-color: var(--ink);
+  box-shadow: 0 30px 60px -20px rgba(14, 22, 40, 0.25);
+}
+.module-band {
+  height: 64px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  transform: translateZ(15px);
+}
+.band-acid { background: var(--acid); }
+.band-coral { background: var(--coral); }
+.band-sage { background: var(--sage); }
+.band-plum { background: var(--plum); }
+.band-gold { background: var(--gold); }
+.band-sage .band-pill, .band-plum .band-pill { color: var(--bone-light); border-color: rgba(244,241,234,0.4); }
+.band-pill {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 3px 7px;
+  border: 1px solid rgba(14,22,40,0.2);
+  border-radius: 4px;
+  color: var(--ink);
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(6px);
+}
+.band-tier {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--ink); color: var(--bone);
+  font-weight: 600; font-size: 0.78rem;
+  display: flex; align-items: center; justify-content: center;
+  letter-spacing: -0.01em;
+  transform: translateZ(8px);
+  transition: transform 0.4s var(--ease);
+}
+.band-tier.gold { background: var(--gold); color: var(--ink); }
+.module:hover .band-tier { transform: translateZ(35px) scale(1.05); }
+.module-body { padding: 1.1rem 1rem 1.1rem; transform: translateZ(8px); }
+.module-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-bottom: 0.3rem;
+}
+.module-by {
+  font-size: 0.82rem;
+  color: var(--ink-3);
+  margin-bottom: 0.85rem;
+}
+.module-stats {
+  display: flex;
+  gap: 0.85rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--bone-edge);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-4);
+}
+.module-stats b {
+  color: var(--ink); font-weight: 600;
+  margin-right: 0.3em;
+  font-family: var(--font-sans);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.85rem;
+}
+
+/* ============================================================
+   PRICING
+   ============================================================ */
+.price-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-top: 3rem;
+}
+.price-card {
+  background: var(--bone-light);
+  border: 1px solid var(--bone-edge);
+  border-radius: var(--r-3);
+  padding: 2rem 1.5rem;
+  transition: all 0.3s var(--ease);
+}
+.price-card.featured {
+  background: var(--ink);
+  color: var(--bone);
+  border-color: var(--ink);
+  position: relative;
+}
+.price-card.featured::before {
+  content: 'MOST PICKED';
+  position: absolute;
+  top: -10px; left: 1.5rem;
+  background: var(--acid);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.price-card:hover { transform: translateY(-3px); box-shadow: 0 20px 40px -15px rgba(14,22,40,0.15); }
+.price-name {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--ink-4);
+  margin-bottom: 0.85rem;
+}
+.price-card.featured .price-name { color: var(--acid); }
+.price-amt {
+  font-size: 2.5rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+.price-amt span {
+  font-size: 1rem;
+  color: var(--ink-3);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.price-card.featured .price-amt span { color: rgba(244,241,234,0.6); }
+.price-credits {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink-3);
+  margin-bottom: 1.25rem;
+}
+.price-card.featured .price-credits { color: rgba(244,241,234,0.7); }
+.price-features {
+  list-style: none;
+  margin-bottom: 1.5rem;
+}
+.price-features li {
+  font-size: 0.88rem;
+  color: var(--ink-3);
+  padding: 0.45rem 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  border-top: 1px dashed var(--bone-edge);
+}
+.price-features li:first-child { border-top: none; }
+.price-card.featured .price-features li { color: rgba(244,241,234,0.78); border-top-color: rgba(244,241,234,0.12); }
+.price-features li::before {
+  content: '+';
+  color: var(--ink-4);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.price-card.featured .price-features li::before { color: var(--acid); }
+.price-cta {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  text-align: center;
+  border-radius: var(--r-2);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  transition: all 0.2s var(--ease);
+}
+.price-cta:hover { background: var(--ink); color: var(--bone); }
+.price-card.featured .price-cta {
+  background: var(--acid);
+  color: var(--ink);
+  border-color: var(--acid);
+}
+.price-card.featured .price-cta:hover { background: var(--acid-deep); border-color: var(--acid-deep); }
+
+/* ============================================================
+   FOR CREATORS
+   ============================================================ */
+.creators {
+  background: var(--ink);
+  color: var(--bone);
+  border-radius: var(--r-4);
+  padding: 4rem 3rem;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 3rem;
+  align-items: center;
+  margin: 0 2rem;
+  position: relative;
+  overflow: hidden;
+}
+@media (max-width: 900px) {
+  .creators {
+    grid-template-columns: 1fr;
+    padding: 2.5rem 1.75rem;
+    margin: 0 1rem;
+  }
+}
+.creators::before {
+  content: '';
+  position: absolute;
+  right: -100px; top: -100px;
+  width: 360px; height: 360px;
+  background: radial-gradient(circle, var(--acid) 0%, transparent 70%);
+  opacity: 0.15;
+  pointer-events: none;
+}
+.creators h2 {
+  color: var(--bone);
+  margin-bottom: 1rem;
+}
+.creators h2 .it { color: var(--acid); }
+.creators .lead {
+  color: rgba(244,241,234,0.75);
+  margin-bottom: 2rem;
+}
+
+.creator-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+.creator-stat .num {
+  font-size: 2.25rem;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--bone);
+}
+.creator-stat .num em {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--coral);
+}
+.creator-stat .lbl {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(244,241,234,0.55);
+  margin-top: 0.4rem;
+}
+
+.creator-quote {
+  background: rgba(244, 241, 234, 0.06);
+  border: 1px solid rgba(244, 241, 234, 0.12);
+  border-radius: var(--r-3);
+  padding: 1.75rem;
+  position: relative;
+}
+.creator-quote .q {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  color: var(--bone);
+  margin-bottom: 1.25rem;
+}
+.creator-quote .who {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(244,241,234,0.12);
+}
+.creator-quote .av {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--coral);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.78rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.creator-quote .nm { font-size: 0.85rem; }
+.creator-quote .nm b { display: block; color: var(--bone); font-weight: 500; }
+.creator-quote .nm span {
+  color: rgba(244,241,234,0.55);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* ============================================================
+   FAQ
+   ============================================================ */
+.faq-list {
+  margin-top: 3rem;
+}
+.faq-item {
+  border-top: 1px solid var(--bone-edge);
+  padding: 1.5rem 0;
+}
+.faq-item:last-child { border-bottom: 1px solid var(--bone-edge); }
+.faq-item summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary h4 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  flex: 1;
+  transition: color 0.2s var(--ease);
+}
+.faq-item summary:hover h4 { color: var(--coral); }
+.faq-toggle {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--bone-edge);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  transition: transform 0.4s var(--ease), background 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.faq-toggle::before, .faq-toggle::after {
+  content: '';
+  position: absolute;
+  background: var(--ink);
+  transition: transform 0.3s var(--ease);
+}
+.faq-toggle::before { width: 10px; height: 1.5px; }
+.faq-toggle::after { width: 1.5px; height: 10px; }
+.faq-item[open] .faq-toggle {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+.faq-item[open] .faq-toggle::before { background: var(--bone); }
+.faq-item[open] .faq-toggle::after { transform: rotate(90deg); background: var(--bone); }
+.faq-item .answer {
+  margin-top: 1rem;
+  color: var(--ink-3);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  max-width: 70ch;
+}
+.faq-item .answer p { margin-bottom: 0.75rem; }
+.faq-item .answer p:last-child { margin-bottom: 0; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer {
+  background: var(--ink);
+  color: var(--bone);
+  padding: 6rem 0 2rem;
+}
+.foot-cta {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding-bottom: 4rem;
+  border-bottom: 1px solid rgba(244,241,234,0.12);
+  margin-bottom: 3rem;
+}
+.foot-cta h2 {
+  color: var(--bone);
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  letter-spacing: -0.045em;
+  max-width: 18ch;
+}
+.foot-cta h2 .it { color: var(--acid); }
+
+.foot-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 4rem;
+}
+@media (max-width: 760px) {
+  .foot-grid { grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .foot-brand { grid-column: 1 / -1; }
+}
+.foot-brand .logo { color: var(--bone); margin-bottom: 1rem; }
+.foot-brand p {
+  color: rgba(244,241,234,0.6);
+  max-width: 32ch;
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+.foot-col h5 {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: rgba(244,241,234,0.5);
+  margin-bottom: 1.25rem;
+  font-weight: 500;
+}
+.foot-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; }
+.foot-col a {
+  font-size: 0.92rem;
+  color: rgba(244,241,234,0.78);
+  transition: color 0.2s var(--ease);
+}
+.foot-col a:hover { color: var(--acid); }
+
+.foot-end {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(244,241,234,0.12);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(244,241,234,0.5);
+}
+
+/* ====== Reveal animation ====== */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+}
+[data-reveal].in { opacity: 1; transform: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ========================== NAV ========================== -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <svg class="logo-mark" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="2" y="4" width="20" height="3.6" rx="0.5" fill="#0E1628"/>
+        <rect x="2" y="10" width="20" height="3.6" rx="0.5" fill="#FF7A5C"/>
+        <rect x="2" y="16" width="20" height="3.6" rx="0.5" fill="#D4FF3A"/>
+      </svg>
+      LayerOn
+    </a>
+    <ul class="nav-links">
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#categories">Categories</a></li>
+      <li><a href="#modules">Modules</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#creators">Become an expert</a></li>
+    </ul>
+    <div class="nav-right">
+      <a class="btn btn-ghost" href="#">Sign in</a>
+      <a class="btn btn-ink" href="#">Browse modules <span class="arrow">→</span></a>
+    </div>
+  </div>
+</nav>
+
+<!-- ========================== HERO ========================== -->
+<header class="hero divider">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-trust" data-reveal>
+          <span class="badge">Y</span>
+          Backed by 120+ verified domain experts
+        </div>
+        <h1 class="hero-title" data-reveal>
+          Want advice from<br>
+          people who <span class="it">actually do</span><br>
+          the <span class="ac">work?</span>
+        </h1>
+        <p class="hero-q" data-reveal>"We hired them. You chat with them."</p>
+        <p class="hero-sub" data-reveal>
+          LayerOn is a marketplace of AI modules built by domain experts. Talk to a <strong>12-year commercial lawyer</strong>, not a foundation model. A <strong>sports-medicine doctor</strong>, not an AI summary. A <strong>CPA who actually files returns</strong>, not a Reddit consensus.
+        </p>
+        <div class="hero-cta" data-reveal>
+          <a class="btn btn-acid btn-lg" data-magnetic>Browse 350+ modules <span class="arrow">→</span></a>
+          <a class="btn btn-outline btn-lg" data-magnetic>Watch a 90-second demo</a>
+        </div>
+      </div>
+
+      <!-- THE STACK -->
+      <div class="stack-stage" aria-hidden="true">
+        <div class="stack-side-label label-l1"><span class="num">01</span>Foundation</div>
+        <div class="stack-side-label label-l4"><span class="num">04</span>You chat with this</div>
+
+        <div class="stack" id="stack">
+          <!-- Layer 1: Foundation model -->
+          <div class="layer layer-1">
+            <div class="layer-head">
+              <span class="layer-tag">01 · Foundation Model</span>
+              <span class="layer-meta">Generic</span>
+            </div>
+            <div class="layer-line">Trained on the open web</div>
+            <div class="layer-line">No domain specialty</div>
+          </div>
+
+          <!-- Layer 2: + Domain knowledge -->
+          <div class="layer layer-2">
+            <div class="layer-head">
+              <span class="layer-tag">02 · Domain Knowledge</span>
+              <span class="layer-meta">+ books</span>
+            </div>
+            <div class="layer-line">UK property statutes 1925→2024</div>
+            <div class="layer-line">200+ landmark case law citations</div>
+          </div>
+
+          <!-- Layer 3: + Expert training -->
+          <div class="layer layer-3">
+            <div class="layer-head">
+              <span class="layer-tag">03 · Expert Training</span>
+              <span class="layer-meta">+ Rachel</span>
+            </div>
+            <div class="layer-line">Rachel M.'s 12 years of practice</div>
+            <div class="layer-line">500+ commercial leases reviewed</div>
+          </div>
+
+          <!-- Layer 4: The LayerOn module — the result -->
+          <div class="layer layer-4">
+            <div class="layer-head">
+              <span class="layer-tag">04 · LEASE REVIEWER</span>
+              <span class="layer-meta">★ Live</span>
+            </div>
+            <div class="layer-4-chat">
+              <div class="chat-q">"Can I break my lease at month 18?"</div>
+              <div class="chat-a">
+                Your <b>clause 2.3(b)</b> grants a rolling break — six months' notice + vacant possession. Dilapidations capped at three months' rent. <b>That's your leverage.</b>
+              </div>
+            </div>
+            <div class="layer-author">
+              <div class="av">RM</div>
+              <div class="nm"><strong>Rachel M.</strong> Commercial Law · 12 yr</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ========================== EXPERT TICKER ========================== -->
+<div class="ticker">
+  <div class="ticker-track">
+    <span class="name">Rachel M.<span class="role">Commercial Law · 12 yr</span></span>
+    <span class="name">Dr. James L.<span class="role">Sports Medicine · 15 yr</span></span>
+    <span class="name">Tom B.<span class="role">CPA, EA · 9 yr</span></span>
+    <span class="name">Mehboob A.<span class="role">Sales Ops · 7 yr</span></span>
+    <span class="name">Aisha R.<span class="role">Immigration Law · 11 yr</span></span>
+    <span class="name">Marcus T.<span class="role">Strength Coach · 14 yr</span></span>
+    <span class="name">Nina P.<span class="role">Tax Strategy · 10 yr</span></span>
+    <span class="name">David K.<span class="role">Real Estate · 18 yr</span></span>
+    <!-- duplicate for seamless loop -->
+    <span class="name">Rachel M.<span class="role">Commercial Law · 12 yr</span></span>
+    <span class="name">Dr. James L.<span class="role">Sports Medicine · 15 yr</span></span>
+    <span class="name">Tom B.<span class="role">CPA, EA · 9 yr</span></span>
+    <span class="name">Mehboob A.<span class="role">Sales Ops · 7 yr</span></span>
+    <span class="name">Aisha R.<span class="role">Immigration Law · 11 yr</span></span>
+    <span class="name">Marcus T.<span class="role">Strength Coach · 14 yr</span></span>
+    <span class="name">Nina P.<span class="role">Tax Strategy · 10 yr</span></span>
+    <span class="name">David K.<span class="role">Real Estate · 18 yr</span></span>
+  </div>
+</div>
+
+<!-- ========================== WHAT IT IS ========================== -->
+<section class="divider">
+  <div class="container">
+    <span class="eyebrow"><span class="num">01</span> What LayerOn is</span>
+    <h2 data-reveal>Generic AI gives <span class="it">vague</span> advice. <br>LayerOn loads in <span class="it">the expert.</span></h2>
+
+    <div class="what-grid">
+      <div class="what-col" data-reveal>
+        <h4>Each module is a person.</h4>
+        <p>Every LayerOn module starts with a <strong>real domain expert</strong> — a lawyer, a doctor, a CPA, a sales lead. They upload their methodology, their reviewed work, their playbooks. The model is loaded with their specific knowledge, not a Wikipedia synthesis.</p>
+      </div>
+      <div class="what-col" data-reveal>
+        <h4>You chat. They've prepared.</h4>
+        <p>When you ask a question, you're not running a fresh prompt against GPT. You're hitting a pre-loaded module that already knows the case law, the contraindications, the tax brackets, the playbook. <strong>The expertise is built in before you arrive.</strong></p>
+      </div>
+      <div class="what-col" data-reveal>
+        <h4>We pay the experts.</h4>
+        <p>Every time someone uses a module, the expert who built it gets paid. <strong>Real income for the people who actually do the work</strong> — and that's why the best ones agree to put their craft on the platform in the first place.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================== FIVE LAYERS ========================== -->
+<section id="how" class="divider">
+  <div class="container">
+    <span class="eyebrow"><span class="num">02</span> How it works</span>
+    <h2 class="five-title runon" data-reveal>Fivelayers<br>betweenyou<br>and<span class="it">badadvice.</span></h2>
+    <p class="lead" data-reveal style="margin-top: 1.5rem">Read it as five words or one — every LayerOn module is built in the same five steps. The result is what you chat with.</p>
+
+    <div class="five-grid">
+      <div class="five-row" data-reveal>
+        <div class="five-num">01</div>
+        <h4>The expert applies.</h4>
+        <p>Rachel — 12 years at Magic Circle litigation, ex-Linklaters — submits her credentials, two reference partners, and a sample of her commercial lease analyses. Our verification team checks every line. Not everyone gets in.</p>
+      </div>
+      <div class="five-row" data-reveal>
+        <div class="five-num">02</div>
+        <h4>She uploads her brain.</h4>
+        <p>Five hundred lease reviews she's done. The annotated playbook her firm uses internally. Statutes she references most. Email exchanges where she explained complex clauses to laypeople. The model now has her reasoning, not just her conclusions.</p>
+      </div>
+      <div class="five-row" data-reveal>
+        <div class="five-num">03</div>
+        <h4>She writes the instructions.</h4>
+        <p>Tone, escalation rules, what to refuse, when to push back, what to flag for human review. <strong>Her instructions, not ours.</strong> The same way she'd brief a junior associate on her team.</p>
+      </div>
+      <div class="five-row" data-reveal>
+        <div class="five-num">04</div>
+        <h4>We choose the model.</h4>
+        <p>Different domains need different foundations. Legal benefits from Claude's careful reasoning. Sales benefits from GPT-4o's rapport. Medical needs the most cautious model on the market. <strong>The expert picks; we wire it up.</strong></p>
+      </div>
+      <div class="five-row" data-reveal>
+        <div class="five-num">05</div>
+        <h4>You chat with the result.</h4>
+        <p>You ask a question about your lease. The module answers in Rachel's voice, with her playbook, citing the same cases she'd cite. You don't get "consult a lawyer" — you get <strong>her actual advice</strong>, every time, for fewer credits than a coffee.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================== CATEGORIES ========================== -->
+<section id="categories" class="divider">
+  <div class="container">
+    <span class="eyebrow"><span class="num">03</span> Categories</span>
+    <h2 data-reveal>One color <span class="it">per domain.</span> Always.</h2>
+    <p class="lead" data-reveal>Every LayerOn category gets a single color. Once you learn the system — acid is legal, coral is fitness, sage is finance, plum is sales — you can scan the marketplace at a glance.</p>
+
+    <div class="cat-grid">
+      <div class="cat-card cat-acid">
+        <div>
+          <div class="cat-name">— Acid</div>
+          <div class="cat-domain">Legal</div>
+        </div>
+        <div>
+          <div class="cat-hex">#D4FF3A</div>
+          <div class="cat-count"><span>62 modules</span><span>—→</span></div>
+        </div>
+      </div>
+      <div class="cat-card cat-coral">
+        <div>
+          <div class="cat-name">— Coral</div>
+          <div class="cat-domain">Fitness & Health</div>
+        </div>
+        <div>
+          <div class="cat-hex">#FF7A5C</div>
+          <div class="cat-count"><span>89 modules</span><span>—→</span></div>
+        </div>
+      </div>
+      <div class="cat-card cat-sage">
+        <div>
+          <div class="cat-name">— Sage</div>
+          <div class="cat-domain">Finance & Tax</div>
+        </div>
+        <div>
+          <div class="cat-hex">#7A9171</div>
+          <div class="cat-count"><span>71 modules</span><span>—→</span></div>
+        </div>
+      </div>
+      <div class="cat-card cat-plum">
+        <div>
+          <div class="cat-name">— Plum</div>
+          <div class="cat-domain">Sales & Strategy</div>
+        </div>
+        <div>
+          <div class="cat-hex">#4A2D52</div>
+          <div class="cat-count"><span>54 modules</span><span>—→</span></div>
+        </div>
+      </div>
+      <div class="cat-card cat-gold">
+        <div>
+          <div class="cat-name">— Gold</div>
+          <div class="cat-domain">Premium tier</div>
+        </div>
+        <div>
+          <div class="cat-hex">#E0A23B</div>
+          <div class="cat-count"><span>38 modules</span><span>—→</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================== MODULES ========================== -->
+<section id="modules" class="divider">
+  <div class="container">
+    <div class="browser-head">
+      <div>
+        <span class="eyebrow"><span class="num">04</span> The marketplace</span>
+        <h2 data-reveal>Built by people <span class="it">you'd hire.</span></h2>
+      </div>
+      <div class="filter-row">
+        <button class="filter-chip active">All · 350</button>
+        <button class="filter-chip">Legal</button>
+        <button class="filter-chip">Fitness</button>
+        <button class="filter-chip">Finance</button>
+        <button class="filter-chip">Sales</button>
+        <button class="filter-chip">Premium ★</button>
+      </div>
+    </div>
+
+    <div class="modules-grid">
+      <div class="module" data-tilt>
+        <div class="module-band band-acid">
+          <span class="band-pill">★ Verified · Legal</span>
+          <span class="band-tier">RM</span>
+        </div>
+        <div class="module-body">
+          <div class="module-name">Lease Reviewer</div>
+          <div class="module-by">Rachel M. · ex-Linklaters</div>
+          <div class="module-stats">
+            <div><b>340</b>uses</div><div><b>4.9</b>rating</div><div><b>£0.40</b>per chat</div>
+          </div>
+        </div>
+      </div>
+      <div class="module" data-tilt>
+        <div class="module-band band-coral">
+          <span class="band-pill">★ Verified · Fitness</span>
+          <span class="band-tier gold">DJ</span>
+        </div>
+        <div class="module-body">
+          <div class="module-name">Gym Programme</div>
+          <div class="module-by">Dr. James L. · Sports Med</div>
+          <div class="module-stats">
+            <div><b>890</b>uses</div><div><b>4.9</b>rating</div><div><b>£0.30</b>per chat</div>
+          </div>
+        </div>
+      </div>
+      <div class="module" data-tilt>
+        <div class="module-band band-sage">
+          <span class="band-pill">★ Verified · Finance</span>
+          <span class="band-tier">TB</span>
+        </div>
+        <div class="module-body">
+          <div class="module-name">Tax Prep Assistant</div>
+          <div class="module-by">Tom B. · CPA, EA</div>
+          <div class="module-stats">
+            <div><b>410</b>uses</div><div><b>4.7</b>rating</div><div><b>£0.45</b>per chat</div>
+          </div>
+        </div>
+      </div>
+      <div class="module" data-tilt>
+        <div class="module-band band-plum">
+          <span class="band-pill">★ Verified · Sales</span>
+          <span class="band-tier">MA</span>
+        </div>
+        <div class="module-body">
+          <div class="module-name">Outreach Builder</div>
+          <div class="module-by">Mehboob A. · Sales Ops</div>
+          <div class="module-stats">
+            <div><b>520</b>uses</div><div><b>4.8</b>rating</div><div><b>£0.35</b>per chat</div>
+          </div>
+        </div>
+      </div>
+      <div class="module" data-tilt>
+        <div class="module-band band-acid">
+          <span class="band-pill">★ Verified · Legal</span>
+          <span class="band-tier">AR</span>
+        </div>
+        <div class="module-body">
+          <div class="module-name">Visa Eligibility</div>
+          <div class="module-by">Aisha R. · Immigration Law</div>
+          <div class="module-stats">
+            <div><b>270</b>uses</div><div><b>4.9</b>rating</div><div><b>£0.50</b>per chat</div>
+          </div>
+        </div>
+      </div>
+      <div class="module" data-tilt>
+        <div class="module-band band-coral">
+          <span class="band-pill">★ Verified · Fitness</span>
+          <span class="band-tier">MT</span>
+        </div>
+        <div class="module-body">
+          <div class="module-name">Strength Coach</div>
+          <div class="module-by">Marcus T. · 14 yr coaching</div>
+          <div class="module-stats">
+            <div><b>620</b>uses</div><div><b>4.8</b>rating</div><div><b>£0.30</b>per chat</div>
+          </div>
+        </div>
+      </div>
+      <div class="module" data-tilt>
+        <div class="module-band band-sage">
+          <span class="band-pill">★ Verified · Finance</span>
+          <span class="band-tier">NP</span>
+        </div>
+        <div class="module-body">
+          <div class="module-name">Tax Strategy Pro</div>
+          <div class="module-by">Nina P. · Senior CPA</div>
+          <div class="module-stats">
+            <div><b>340</b>uses</div><div><b>4.8</b>rating</div><div><b>£0.55</b>per chat</div>
+          </div>
+        </div>
+      </div>
+      <div class="module" data-tilt>
+        <div class="module-band band-gold">
+          <span class="band-pill">★ Premium · Real Estate</span>
+          <span class="band-tier gold">DK</span>
+        </div>
+        <div class="module-body">
+          <div class="module-name">Deal Underwriter</div>
+          <div class="module-by">David K. · 18 yr investing</div>
+          <div class="module-stats">
+            <div><b>180</b>uses</div><div><b>4.9</b>rating</div><div><b>£1.20</b>per chat</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================== PRICING ========================== -->
+<section id="pricing" class="divider">
+  <div class="container">
+    <span class="eyebrow"><span class="num">05</span> Pricing</span>
+    <h2 data-reveal>Pay <span class="it">per chat,</span> not per month.</h2>
+    <p class="lead" data-reveal>You buy credits. Each chat costs five credits. Credits never expire. The expert who built the module gets paid every time you use it.</p>
+
+    <div class="price-grid">
+      <div class="price-card">
+        <div class="price-name">Starter</div>
+        <div class="price-amt">£4<span>.99</span></div>
+        <div class="price-credits">50 credits · 10 chats</div>
+        <ul class="price-features">
+          <li>Try any module</li>
+          <li>Save chat history</li>
+          <li>Credits never expire</li>
+        </ul>
+        <a class="price-cta">Get started</a>
+      </div>
+      <div class="price-card featured">
+        <div class="price-name">Pro</div>
+        <div class="price-amt">£24<span>.99</span></div>
+        <div class="price-credits">300 credits · 60 chats</div>
+        <ul class="price-features">
+          <li>Save expert favourites</li>
+          <li>Priority module support</li>
+          <li>15% discount on premium tier</li>
+          <li>Early access to new modules</li>
+        </ul>
+        <a class="price-cta">Most picked</a>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Studio</div>
+        <div class="price-amt">£99<span>.00</span></div>
+        <div class="price-credits">1,500 credits · 300 chats</div>
+        <ul class="price-features">
+          <li>Multi-seat workspace</li>
+          <li>API access</li>
+          <li>Custom module commissions</li>
+          <li>Direct line to creators</li>
+        </ul>
+        <a class="price-cta">Get Studio</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================== FOR CREATORS ========================== -->
+<section id="creators">
+  <div class="creators">
+    <div>
+      <span class="eyebrow" style="color: rgba(244,241,234,0.6); margin-bottom: 1rem"><span class="num" style="color: var(--bone)">06</span> For experts</span>
+      <h2>Build a module. <br><span class="it">Get paid forever.</span></h2>
+      <p class="lead">Your craft already works. Now make it work for you 24/7. Top creators on LayerOn earn between £600 and £4,200 per month — real passive income from real expertise.</p>
+
+      <div class="creator-stats">
+        <div class="creator-stat">
+          <div class="num">£<em>1,840</em></div>
+          <div class="lbl">Average monthly earnings · top tier</div>
+        </div>
+        <div class="creator-stat">
+          <div class="num">~9 days</div>
+          <div class="lbl">From application to live module</div>
+        </div>
+      </div>
+
+      <a class="btn btn-acid btn-lg" data-magnetic>Apply to be a creator <span class="arrow">→</span></a>
+    </div>
+
+    <div class="creator-quote">
+      <p class="q">"I built a strength-coaching module in two weekends. It's done 600+ chats this month. That's more income than the gym pays me, and I'm asleep when most of it happens."</p>
+      <div class="who">
+        <div class="av">MT</div>
+        <div class="nm"><b>Marcus T.</b><span>Strength Coach · LayerOn since 2025</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========================== FAQ ========================== -->
+<section class="divider">
+  <div class="container">
+    <span class="eyebrow"><span class="num">07</span> FAQ</span>
+    <h2 data-reveal>Things <span class="it">people ask</span> first.</h2>
+
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary>
+          <h4>How is this different from just using ChatGPT with a long prompt?</h4>
+          <span class="faq-toggle"></span>
+        </summary>
+        <div class="answer">
+          <p>Three real differences: <strong>(1)</strong> the modules are built by domain experts who upload their actual reviewed work — case files, training programs, tax returns — not just a prompt; <strong>(2)</strong> we run a verification process so you know the credentials are real; <strong>(3)</strong> the expert chooses the underlying model, gives the system instructions, and gets paid for every chat. None of that happens when you write a prompt yourself.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <h4>Are the experts actually answering, or is it just AI?</h4>
+          <span class="faq-toggle"></span>
+        </summary>
+        <div class="answer">
+          <p>It's AI — we're transparent about that. But the AI has been loaded with the expert's specific knowledge, voice, and instructions. So when you ask Rachel's module about a lease clause, the AI answers in <em>her</em> voice with <em>her</em> playbook. It's not Rachel typing. It's a model that's been trained to think like Rachel does.</p>
+          <p>For complex matters, the modules will explicitly flag <em>"this is the kind of question that needs the human"</em> and offer to book Rachel directly.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <h4>What stops a fake expert from creating a module?</h4>
+          <span class="faq-toggle"></span>
+        </summary>
+        <div class="answer">
+          <p>Every creator submits credentials, two professional references, and a sample of their work. We verify all three before they can publish. Industry-specific verification varies — for legal we check bar registration; for medical we verify licensure; for finance we check certification numbers. <strong>About 38% of applicants get through.</strong> The rest get specific feedback on what's missing.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <h4>What if a module gives me wrong advice?</h4>
+          <span class="faq-toggle"></span>
+        </summary>
+        <div class="answer">
+          <p>Modules are advisory, not legally binding. But because every chat carries the expert's name and credentials, we hold creators accountable in ways generic AI doesn't. <strong>Repeated quality issues mean the module gets pulled and the credit refunded.</strong> Top-tier modules carry an additional accuracy guarantee — read the module's about page for specifics.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <h4>What does it cost?</h4>
+          <span class="faq-toggle"></span>
+        </summary>
+        <div class="answer">
+          <p>Credits start at £4.99 for 50. Each chat is 5 credits. Premium tier modules cost more per chat — they're built by senior practitioners with deeper specialty. Credits don't expire. <strong>You can run a full lease review for under a pound.</strong> A standard solicitor consultation in the UK runs £200-400.</p>
+        </div>
+      </details>
+      <details class="faq-item">
+        <summary>
+          <h4>I'm an expert. How much will I make?</h4>
+          <span class="faq-toggle"></span>
+        </summary>
+        <div class="answer">
+          <p>Honestly, it depends on demand for your domain and how good your module is. Our top quartile of creators earns over £1,400/month. The median is around £180/month. The bottom quartile earns less than £20/month — usually because they didn't upload enough material or didn't write tight system instructions.</p>
+          <p>What we can promise: <strong>70% of every chat fee goes to the creator.</strong> No exclusivity, no minimum hours, no quotas. You build it, it runs, you get paid.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ========================== FOOTER ========================== -->
+<footer>
+  <div class="container">
+    <div class="foot-cta">
+      <h2>Stop settling for<br><span class="it">generic</span> AI.</h2>
+      <a class="btn btn-acid btn-lg" data-magnetic>Browse 350+ modules <span class="arrow">→</span></a>
+    </div>
+
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#" class="logo">
+          <svg class="logo-mark" viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="2" y="4" width="20" height="3.6" rx="0.5" fill="#F4F1EA"/>
+            <rect x="2" y="10" width="20" height="3.6" rx="0.5" fill="#FF7A5C"/>
+            <rect x="2" y="16" width="20" height="3.6" rx="0.5" fill="#D4FF3A"/>
+          </svg>
+          LayerOn
+        </a>
+        <p>AI guided by people who actually do the work. 350+ modules. 120+ verified experts. The marketplace where expertise becomes infinitely accessible.</p>
+      </div>
+      <div class="foot-col">
+        <h5>Product</h5>
+        <ul>
+          <li><a href="#">Browse modules</a></li>
+          <li><a href="#">Categories</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Premium tier</a></li>
+          <li><a href="#">For teams</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h5>Creators</h5>
+        <ul>
+          <li><a href="#">Apply</a></li>
+          <li><a href="#">Creator handbook</a></li>
+          <li><a href="#">Earnings model</a></li>
+          <li><a href="#">Success stories</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h5>Company</h5>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Press</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="foot-end">
+      <span>© 2026 LayerOn Ltd.</span>
+      <span>Privacy · Terms · Cookies</span>
+      <span>founders@layeron.com</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(() => {
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ====== Reveal on scroll ====== */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+  document.querySelectorAll('[data-reveal]').forEach((el, i) => {
+    el.style.transitionDelay = `${Math.min(i * 80, 500)}ms`;
+    io.observe(el);
+  });
+
+  /* ====== Magnetic buttons ====== */
+  if (!reduceMotion) {
+    document.querySelectorAll('[data-magnetic]').forEach(btn => {
+      let dx = 0, dy = 0, ax = 0, ay = 0, raf = null;
+      const tick = () => {
+        ax += (dx - ax) * 0.18;
+        ay += (dy - ay) * 0.18;
+        btn.style.transform = `translate(${ax}px,${ay}px)`;
+        if (Math.abs(dx - ax) > 0.05 || Math.abs(dy - ay) > 0.05) raf = requestAnimationFrame(tick);
+        else raf = null;
+      };
+      const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
+      btn.addEventListener('mousemove', (e) => {
+        const r = btn.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        dx = Math.max(-12, Math.min(12, (e.clientX - cx) * 0.35));
+        dy = Math.max(-12, Math.min(12, (e.clientY - cy) * 0.35));
+        kick();
+      });
+      btn.addEventListener('mouseleave', () => { dx = 0; dy = 0; kick(); });
+    });
+  }
+
+  /* ====== Module 3D tilt ====== */
+  if (!reduceMotion) {
+    document.querySelectorAll('[data-tilt]').forEach(card => {
+      let rx = 0, ry = 0, arx = 0, ary = 0, raf = null;
+      const tick = () => {
+        arx += (rx - arx) * 0.12;
+        ary += (ry - ary) * 0.12;
+        card.style.transform = `perspective(1200px) rotateX(${arx}deg) rotateY(${ary}deg)`;
+        if (Math.abs(rx - arx) > 0.01 || Math.abs(ry - ary) > 0.01) raf = requestAnimationFrame(tick);
+        else raf = null;
+      };
+      const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        const px = (e.clientX - r.left) / r.width - 0.5;
+        const py = (e.clientY - r.top) / r.height - 0.5;
+        ry = px * 12;
+        rx = -py * 8;
+        kick();
+      });
+      card.addEventListener('mouseleave', () => { rx = 0; ry = 0; kick(); });
+    });
+  }
+
+  /* ====== Stack: subtle mouse parallax over the whole assembly ====== */
+  if (!reduceMotion) {
+    const stage = document.querySelector('.stack-stage');
+    const stack = document.getElementById('stack');
+    if (stage && stack) {
+      let tx = 0, ty = 0, ax = 0, ay = 0, raf = null, hovering = false;
+      const tick = () => {
+        ax += (tx - ax) * 0.08;
+        ay += (ty - ay) * 0.08;
+        // Only apply when not in CSS hover (which has its own transform)
+        if (!hovering) {
+          stack.style.transform = `rotateX(${ay}deg) rotateY(${ax}deg)`;
+        }
+        if (Math.abs(tx - ax) > 0.02 || Math.abs(ty - ay) > 0.02) raf = requestAnimationFrame(tick);
+        else raf = null;
+      };
+      const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
+
+      window.addEventListener('mousemove', (e) => {
+        const r = stage.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        tx = ((e.clientX - cx) / window.innerWidth) * 8;
+        ty = -((e.clientY - cy) / window.innerHeight) * 6;
+        kick();
+      });
+      stage.addEventListener('mouseenter', () => { hovering = true; });
+      stage.addEventListener('mouseleave', () => {
+        hovering = false;
+        // Smoothly return baseline
+        tx = 0; ty = 0;
+        kick();
+      });
+    }
+  }
+
+  /* ====== Filter chips (visual only) ====== */
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+    });
+  });
+})();
+</script>
+</body>
+</html>

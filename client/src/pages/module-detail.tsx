@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
 import { api, type Module } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, MessageSquare, Heart, Star, Users, Zap, FileText, Loader2 } from "lucide-react";
+import { ArrowLeft, MessageSquare, Heart, Users, Zap, Loader2 } from "lucide-react";
+import { LayerNav } from "@/components/layer/LayerNav";
+
+const BANDS = ["band-acid", "band-coral", "band-sage", "band-plum", "band-gold"] as const;
 
 export default function ModuleDetailPage() {
   const [match, params] = useRoute("/modules/:id");
@@ -16,18 +19,28 @@ export default function ModuleDetailPage() {
   useEffect(() => {
     if (!match || !params?.id) return;
     const loadModule = async () => {
-      try { const data = await api.getModule(params.id); setModule(data); }
-      catch (error: any) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
-      finally { setLoading(false); }
+      try {
+        const data = await api.getModule(params.id);
+        setModule(data);
+      } catch (error: any) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } finally {
+        setLoading(false);
+      }
     };
     loadModule();
   }, [params?.id, toast, match]);
 
   const handleUse = async () => {
     setCreating(true);
-    try { const conversation = await api.createConversation(module!.id, module!.title); setLocation(`/chat/${conversation.id}`); }
-    catch (error: any) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
-    finally { setCreating(false); }
+    try {
+      const conversation = await api.createConversation(module!.id, module!.title);
+      setLocation(`/chat/${conversation.id}`);
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setCreating(false);
+    }
   };
 
   const handleToggleFavorite = async () => {
@@ -35,102 +48,257 @@ export default function ModuleDetailPage() {
       if (isFavorited) await api.removeFavorite(module!.id);
       else await api.addFavorite(module!.id);
       setIsFavorited(!isFavorited);
-    } catch (error: any) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
   };
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "transparent", position: "relative", zIndex: 1 }}>
-      <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#52525b" }} />
-    </div>
-  );
-
-  if (!module) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "transparent", position: "relative", zIndex: 1 }}>
-      <div className="text-center">
-        <p className="text-[14px] font-bold mb-4" style={{ color: "#fafafa" }}>Module not found</p>
-        <button onClick={() => setLocation("/explore")} className="text-[13px] px-5 py-2.5 rounded-xl font-semibold" style={{ backgroundColor: "var(--accent-blue)", color: "#fff" }}>Browse Modules</button>
+  if (loading)
+    return (
+      <div style={{ background: "var(--bone)", minHeight: "100vh" }}>
+        <LayerNav />
+        <div className="flex items-center justify-center" style={{ minHeight: "60vh" }}>
+          <Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--ink-4)" }} />
+        </div>
       </div>
-    </div>
-  );
+    );
+
+  if (!module)
+    return (
+      <div style={{ background: "var(--bone)", minHeight: "100vh" }}>
+        <LayerNav />
+        <div className="flex items-center justify-center" style={{ minHeight: "60vh" }}>
+          <div style={{ textAlign: "center" }}>
+            <p style={{ fontSize: "1.1rem", fontWeight: 600, marginBottom: "1rem" }}>Module not found</p>
+            <button className="btn btn-ink" onClick={() => setLocation("/explore")}>
+              Browse modules <span className="arrow">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+
+  const initials = module.title.slice(0, 2).toUpperCase();
+  const band = BANDS[Math.floor(module.title.length % BANDS.length)];
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "transparent", position: "relative", zIndex: 1 }}>
-      <header className="sticky top-0 z-40 glass-navbar">
-        <div className="max-w-[1000px] mx-auto px-6 h-16 flex items-center gap-4">
-          <button onClick={() => setLocation("/explore")} className="p-2 rounded-lg gentle-animation hover:bg-white/5" style={{ color: "#71717a" }} data-testid="button-back">
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <span className="font-bagel text-lg tracking-wider cursor-pointer" style={{ color: "#fafafa" }} onClick={() => setLocation("/")}>LAYERON</span>
-          <span className="text-[13px] font-semibold" style={{ color: "#71717a" }}>/ Module Details</span>
-        </div>
-      </header>
+    <div style={{ background: "var(--bone)", minHeight: "100vh", color: "var(--ink)" }}>
+      <LayerNav />
 
-      <div className="max-w-[1000px] mx-auto px-6 py-10">
-        <div className="mb-10">
-          <div className="flex items-start gap-5 mb-6">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-[14px] font-bold shrink-0" style={{ backgroundColor: "rgba(37,99,235,0.1)", color: "var(--accent-blue)" }}>
-              {module.title.slice(0, 2).toUpperCase()}
+      <div className="layer-container" style={{ paddingTop: "2rem", paddingBottom: "2rem" }}>
+        <button
+          onClick={() => setLocation("/explore")}
+          className="btn btn-ghost"
+          data-testid="button-back"
+          style={{ paddingLeft: 0 }}
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to marketplace
+        </button>
+      </div>
+
+      <section className="layer-section layer-divider" style={{ paddingTop: "1rem", paddingBottom: "4rem" }}>
+        <div className="layer-container">
+          <div
+            style={{
+              borderRadius: "var(--r-3)",
+              overflow: "hidden",
+              border: "1px solid var(--bone-edge)",
+              marginBottom: "2.5rem",
+            }}
+          >
+            <div className={`module-band ${band}`} style={{ height: 120, padding: "1.25rem 1.5rem" }}>
+              <span className="band-pill">
+                {module.featured ? "★ Featured" : "★ Verified"} ·{" "}
+                {(module as any).category || "Expert module"}
+              </span>
+              <span className="band-tier" style={{ width: 48, height: 48, fontSize: "1rem" }}>
+                {initials}
+              </span>
             </div>
+            <div style={{ background: "var(--bone-light)", padding: "2rem 1.75rem" }}>
+              <h1 style={{ fontSize: "var(--t-4)", marginBottom: "0.75rem" }}>{module.title}</h1>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "1.5rem",
+                  flexWrap: "wrap",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "0.72rem",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.12em",
+                  color: "var(--ink-4)",
+                  marginBottom: "1rem",
+                }}
+              >
+                {(module as any).creator?.firstName && (
+                  <span>by {(module as any).creator.firstName}</span>
+                )}
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                  <Users className="w-3 h-3" /> {module.usageCount} uses
+                </span>
+                {(module as any).provider && (
+                  <span>
+                    {(module as any).provider} / {(module as any).model}
+                  </span>
+                )}
+              </div>
+              <p style={{ fontSize: "var(--t-2)", color: "var(--ink-3)", lineHeight: 1.55, maxWidth: "60ch" }}>
+                {module.description}
+              </p>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 320px",
+              gap: "2rem",
+            }}
+          >
             <div>
-              <h1 className="text-2xl md:text-3xl font-black mb-2" style={{ color: "#fafafa" }}>{module.title}</h1>
-              <div className="flex items-center gap-4 text-[12px]" style={{ color: "#71717a" }}>
-                {(module as any).creator?.firstName && <span>by {(module as any).creator.firstName}</span>}
-                <span className="flex items-center gap-1"><Users className="w-3 h-3" /> {module.usageCount} uses</span>
-                {module.featured && <span className="px-2 py-0.5 rounded-full" style={{ backgroundColor: "rgba(37,99,235,0.08)", color: "var(--accent-blue)", border: "1px solid rgba(37,99,235,0.15)" }}>Featured</span>}
-              </div>
-            </div>
-          </div>
-          <p className="text-[14px] leading-[1.8]" style={{ color: "#a1a1aa" }}>{module.description}</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            {module.instructions && (
-              <div className="p-8 rounded-2xl glass-card">
-                <h2 className="text-lg font-black mb-4" style={{ color: "#fafafa" }}>How It Works</h2>
-                <div className="text-[13px] leading-[1.8] whitespace-pre-wrap" style={{ color: "#71717a" }}>{module.instructions}</div>
-              </div>
-            )}
-            {module?.conversationStarters && Array.isArray(module.conversationStarters) && module.conversationStarters.length > 0 && (
-              <div className="p-8 rounded-2xl glass-card">
-                <h2 className="text-lg font-black mb-4" style={{ color: "#fafafa" }}>Suggested Questions</h2>
-                <div className="flex flex-wrap gap-2">
-                  {module.conversationStarters.map((starter: string, idx: number) => (
-                    <span key={idx} className="text-[12px] px-4 py-2 rounded-xl glass-card" style={{ color: "#a1a1aa" }}>{starter}</span>
-                  ))}
+              {module.instructions && (
+                <div
+                  style={{
+                    background: "var(--bone-light)",
+                    border: "1px solid var(--bone-edge)",
+                    borderRadius: "var(--r-3)",
+                    padding: "2rem",
+                    marginBottom: "1.5rem",
+                  }}
+                >
+                  <span className="eyebrow"><span className="num">A</span> How it works</span>
+                  <div
+                    style={{
+                      fontSize: "0.95rem",
+                      color: "var(--ink-3)",
+                      lineHeight: 1.7,
+                      whiteSpace: "pre-wrap",
+                    }}
+                  >
+                    {module.instructions}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-
-          <div>
-            <div className="p-6 rounded-2xl sticky top-20 space-y-3 glass-card">
-              <button onClick={handleUse} disabled={creating} className="w-full py-3 rounded-xl text-[13px] font-semibold flex items-center justify-center gap-2 gentle-animation hover:scale-105 disabled:opacity-50" style={{ backgroundColor: "var(--accent-blue)", color: "#fff" }} data-testid="button-use-module">
-                {creating ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare className="w-4 h-4" />}
-                {creating ? "Starting..." : "Start Conversation"}
-              </button>
-              <button onClick={handleToggleFavorite} className="w-full py-3 rounded-xl text-[13px] font-medium flex items-center justify-center gap-2 glass-card gentle-animation" style={{ color: isFavorited ? "var(--accent-red)" : "#a1a1aa" }} data-testid="button-favorite">
-                <Heart className={`w-4 h-4 ${isFavorited ? "fill-current" : ""}`} />
-                {isFavorited ? "Saved" : "Save to Library"}
-              </button>
-              <div className="mt-4 p-4 rounded-xl" style={{ backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid #27272a" }}>
-                <div className="flex items-center justify-between text-[12px]">
-                  <span style={{ color: "#52525b" }}>Cost per message</span>
-                  <span className="flex items-center gap-1 font-semibold" style={{ color: "var(--accent-blue)" }}><Zap className="w-3 h-3" /> 5 credits</span>
-                </div>
-              </div>
-              {(module as any)?.provider && (
-                <div className="p-4 rounded-xl" style={{ backgroundColor: "rgba(255,255,255,0.02)", border: "1px solid #27272a" }}>
-                  <div className="flex items-center justify-between text-[12px]">
-                    <span style={{ color: "#52525b" }}>AI Model</span>
-                    <span className="font-semibold" style={{ color: "#a1a1aa" }}>{(module as any).provider}/{(module as any).model}</span>
+              )}
+              {module?.conversationStarters && Array.isArray(module.conversationStarters) && module.conversationStarters.length > 0 && (
+                <div
+                  style={{
+                    background: "var(--bone-light)",
+                    border: "1px solid var(--bone-edge)",
+                    borderRadius: "var(--r-3)",
+                    padding: "2rem",
+                  }}
+                >
+                  <span className="eyebrow"><span className="num">B</span> Suggested questions</span>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                    {module.conversationStarters.map((starter: string, idx: number) => (
+                      <span
+                        key={idx}
+                        style={{
+                          fontSize: "0.85rem",
+                          padding: "0.55rem 0.9rem",
+                          borderRadius: 999,
+                          background: "var(--bone)",
+                          border: "1px solid var(--bone-edge)",
+                          color: "var(--ink-2)",
+                          fontFamily: "var(--font-serif)",
+                          fontStyle: "italic",
+                        }}
+                      >
+                        {starter}
+                      </span>
+                    ))}
                   </div>
                 </div>
               )}
             </div>
+
+            <aside>
+              <div
+                style={{
+                  background: "var(--ink)",
+                  color: "var(--bone)",
+                  borderRadius: "var(--r-3)",
+                  padding: "1.5rem",
+                  position: "sticky",
+                  top: 80,
+                }}
+              >
+                <button
+                  className="btn btn-acid"
+                  onClick={handleUse}
+                  disabled={creating}
+                  data-testid="button-use-module"
+                  style={{ width: "100%", justifyContent: "center", padding: "0.85rem", fontSize: "0.95rem" }}
+                >
+                  {creating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Starting…
+                    </>
+                  ) : (
+                    <>
+                      <MessageSquare className="w-4 h-4" /> Start conversation
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={handleToggleFavorite}
+                  data-testid="button-favorite"
+                  className="btn btn-outline"
+                  style={{
+                    width: "100%",
+                    justifyContent: "center",
+                    marginTop: "0.6rem",
+                    background: "transparent",
+                    color: isFavorited ? "var(--coral)" : "var(--bone)",
+                    borderColor: "rgba(244,241,234,0.2)",
+                  }}
+                >
+                  <Heart className={`w-4 h-4 ${isFavorited ? "fill-current" : ""}`} />
+                  {isFavorited ? "Saved" : "Save to library"}
+                </button>
+
+                <div
+                  style={{
+                    marginTop: "1.25rem",
+                    padding: "1rem",
+                    borderRadius: "var(--r-2)",
+                    background: "rgba(244,241,234,0.04)",
+                    border: "1px solid rgba(244,241,234,0.1)",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      fontSize: "0.78rem",
+                    }}
+                  >
+                    <span style={{ color: "rgba(244,241,234,0.55)" }}>Cost per message</span>
+                    <span
+                      style={{
+                        color: "var(--acid)",
+                        fontWeight: 600,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 4,
+                      }}
+                    >
+                      <Zap className="w-3 h-3" /> 5 credits
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </aside>
           </div>
         </div>
-      </div>
+
+        <style>{`
+          @media (max-width: 900px) {
+            .module-detail-grid { grid-template-columns: 1fr !important; }
+          }
+        `}</style>
+      </section>
     </div>
   );
 }

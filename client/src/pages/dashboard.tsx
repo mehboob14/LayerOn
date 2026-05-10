@@ -1,60 +1,63 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
-import { api, type Module, type Conversation } from "@/lib/api";
-import { Plus, Home, MessageSquare, Clock, Trash2, ArrowRight, Loader2, Layers, CreditCard, BarChart3, Settings, Search } from "lucide-react";
+import { api, type Module, type Conversation, type User } from "@/lib/api";
+import {
+  MessageSquare,
+  Clock,
+  Trash2,
+  ArrowRight,
+  Loader2,
+  Heart,
+  Compass,
+  CreditCard,
+  Sparkles,
+} from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { UserButton } from "@clerk/clerk-react";
+import { LayerNav } from "@/components/layer/LayerNav";
+
+const BANDS = ["band-acid", "band-coral", "band-sage", "band-plum", "band-gold"] as const;
 
 export default function DashboardPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [modules, setModules] = useState<Module[]>([]);
+  const [me, setMe] = useState<User | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [myModules, setMyModules] = useState<Module[]>([]);
-  const [stats, setStats] = useState({ modules: 0, conversations: 0, credits: 100, notifications: 0 });
+  const [favorites, setFavorites] = useState<(Module & { creator: any })[]>([]);
+  const [credits, setCredits] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [startingChat, setStartingChat] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<"modules" | "conversations" | "my-modules">("modules");
-
-  const colors = ["var(--accent-blue)", "var(--accent-emerald)", "var(--accent-purple)", "var(--accent-amber)", "var(--accent-red)"];
-  const getColor = (i: number) => colors[i % colors.length];
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        const [publicModules, userConversations, creatorModules] = await Promise.all([
-          api.getPublicModules().catch(() => []),
+        const [user, convs, favs, creditsData] = await Promise.all([
+          api.getMe().catch(() => null),
           api.getConversations().catch(() => []),
-          api.getMyModules().catch(() => []),
+          api.getFavorites().catch(() => []),
+          api.getCredits().catch(() => ({ credits: 0 })),
         ]);
-        setModules(publicModules || []);
-        setConversations(userConversations || []);
-        setMyModules(creatorModules || []);
-        setStats({ modules: (publicModules || []).length, conversations: (userConversations || []).length, credits: 100, notifications: 0 });
-      } catch (error) { console.error("Failed to load dashboard data:", error); }
-      finally { setLoading(false); }
+        setMe(user);
+        setConversations(convs || []);
+        setFavorites(favs || []);
+        setCredits(creditsData?.credits || 0);
+      } catch (error) {
+        console.error("Failed to load dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
     };
     loadData();
   }, []);
-
-  const handleStartConversation = async (moduleId: string, moduleTitle: string) => {
-    setStartingChat(moduleId);
-    try {
-      const conversation = await api.createConversation(moduleId, moduleTitle);
-      setLocation(`/chat/${conversation.id}`);
-    } catch (error: any) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
-    finally { setStartingChat(null); }
-  };
 
   const handleDeleteConversation = async (convId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!window.confirm("Delete this conversation?")) return;
     try {
       await api.deleteConversation(convId);
-      setConversations(prev => prev.filter(c => c.id !== convId));
-      setStats(prev => ({ ...prev, conversations: prev.conversations - 1 }));
-    } catch (error: any) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
+      setConversations((prev) => prev.filter((c) => c.id !== convId));
+    } catch (error: any) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    }
   };
 
   const timeAgo = (dateStr: string) => {
@@ -70,181 +73,371 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "transparent", position: "relative", zIndex: 1 }}>
-        <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#52525b" }} data-testid="text-loading" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--bone)" }}>
+        <Loader2 className="w-6 h-6 animate-spin" style={{ color: "var(--ink-4)" }} data-testid="text-loading" />
       </div>
     );
   }
 
+  const recentConvs = [...conversations]
+    .sort((a, b) => (b.updatedAt || b.createdAt).localeCompare(a.updatedAt || a.createdAt))
+    .slice(0, 5);
+
+  const isCreator = me?.role === "creator";
+
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "transparent", position: "relative", zIndex: 1 }}>
-      <header className="sticky top-0 z-40 glass-navbar">
-        <div className="max-w-[1200px] mx-auto px-6 sm:px-8 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <span className="font-bagel text-lg tracking-wider cursor-pointer" style={{ color: "#fafafa" }} onClick={() => setLocation("/")} data-testid="link-home">LAYERON</span>
-            <div className="hidden md:flex items-center gap-1">
-              <button onClick={() => setLocation("/")} className="p-2 rounded-lg gentle-animation hover:bg-white/5" style={{ color: "#71717a" }} data-testid="button-home"><Home className="w-[18px] h-[18px]" /></button>
-              <button onClick={() => setLocation("/explore")} className="p-2 rounded-lg gentle-animation hover:bg-white/5" style={{ color: "#71717a" }}><Search className="w-[18px] h-[18px]" /></button>
-              <button onClick={() => setLocation("/create")} className="p-2 rounded-lg gentle-animation hover:bg-white/5" style={{ color: "#71717a" }} data-testid="button-create"><Plus className="w-[18px] h-[18px]" /></button>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setLocation("/billing")} className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[12px] gentle-animation hover:bg-white/5" style={{ border: "1px solid #27272a", color: "#a1a1aa" }} data-testid="stat-credits">
-              <CreditCard className="w-3.5 h-3.5" style={{ color: "var(--accent-blue)" }} />
-              {stats.credits} credits
-            </button>
-            <button onClick={() => setLocation("/profile")} className="p-2 rounded-lg gentle-animation hover:bg-white/5" style={{ color: "#71717a" }} data-testid="button-profile"><Settings className="w-[18px] h-[18px]" /></button>
-            <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: { width: 32, height: 32 } } }} />
-          </div>
+    <div style={{ background: "var(--bone)", minHeight: "100vh", color: "var(--ink)" }}>
+      <LayerNav
+        primaryCta={{ label: "Browse modules", href: "/explore" }}
+        links={[
+          { label: "Explore", href: "/explore" },
+          { label: "Library", href: "/library" },
+          { label: "History", href: "/history" },
+          { label: "Billing", href: "/billing" },
+        ]}
+      />
+
+      <section className="layer-section layer-divider" style={{ paddingTop: "3rem", paddingBottom: "2.5rem" }}>
+        <div className="layer-container">
+          <span className="eyebrow"><span className="num">★</span> Welcome back</span>
+          <h1 data-testid="text-dashboard-title" style={{ fontSize: "var(--t-5)", marginBottom: "1rem" }}>
+            Your <span className="it">layer</span> on top.
+          </h1>
+          <p className="lead">Pick up a recent chat, browse new modules, or top up credits.</p>
         </div>
-      </header>
+      </section>
 
-      <div className="max-w-[1200px] mx-auto px-6 sm:px-8 py-10">
-        <div className="mb-10">
-          <div className="inline-flex items-center gap-2.5 mb-4">
-            <span className="w-2.5 h-2.5 rounded-full animate-pulse" style={{ backgroundColor: "var(--accent-emerald)" }} />
-            <span className="text-xs font-semibold" style={{ color: "#71717a" }}>Your workspace</span>
-          </div>
-          <h2 className="text-3xl font-black mb-2" style={{ color: "#fafafa" }} data-testid="text-dashboard-title">Dashboard</h2>
-          <p className="text-sm" style={{ color: "#71717a" }}>Manage your modules, conversations, and credits.</p>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-          {[
-            { label: "Available Modules", value: stats.modules, id: "stat-modules", color: "var(--accent-blue)" },
-            { label: "Conversations", value: stats.conversations, id: "stat-conversations", color: "var(--accent-emerald)" },
-            { label: "My Modules", value: myModules.length, id: "stat-my-modules", color: "var(--accent-purple)" },
-            { label: "Credits", value: stats.credits, id: "stat-credits-card", color: "var(--accent-amber)", accent: true },
-          ].map((s) => (
-            <div key={s.id} className="p-5 rounded-2xl glass-card gentle-animation" data-testid={s.id}>
-              <p className="text-[11px] uppercase tracking-wider mb-2" style={{ color: "#52525b" }}>{s.label}</p>
-              <p className="text-3xl font-black" style={{ color: s.accent ? s.color : "#fafafa" }}>{s.value}</p>
-              {s.accent && <button onClick={() => setLocation("/billing")} className="text-[11px] mt-1 font-semibold" style={{ color: "var(--accent-blue)" }}>Buy more →</button>}
-            </div>
-          ))}
-        </div>
-
-        <div className="flex gap-1 mb-8" style={{ borderBottom: "1px solid #27272a" }}>
-          {[
-            { id: "modules" as const, label: "Browse Modules", icon: Layers },
-            { id: "conversations" as const, label: "Conversations", icon: MessageSquare },
-            { id: "my-modules" as const, label: "My Modules", icon: Plus },
-          ].map((tab) => (
-            <button key={tab.id} onClick={() => setActiveView(tab.id)} className="flex items-center gap-2 px-5 py-3 text-[13px] font-medium gentle-animation relative" style={{ color: activeView === tab.id ? "#fafafa" : "#52525b", borderBottom: activeView === tab.id ? "2px solid var(--accent-blue)" : "2px solid transparent", marginBottom: "-1px" }} data-testid={`tab-${tab.id}`}>
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {activeView === "modules" && (
-          modules.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {modules.map((module, i) => (
-                <div key={module.id} className="group p-6 rounded-2xl glass-card gentle-animation hover:elevated-shadow" data-testid={`card-module-${module.id}`}>
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center text-[11px] font-bold" style={{ backgroundColor: `color-mix(in srgb, ${getColor(i)} 12%, transparent)`, color: getColor(i) }}>
-                      {module.title.slice(0, 2).toUpperCase()}
-                    </div>
-                    {(module as any).provider && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ color: "#52525b", border: "1px solid #27272a" }}>
-                        {(module as any).provider}/{(module as any).model}
-                      </span>
-                    )}
-                  </div>
-                  <h4 className="text-[15px] font-bold mb-1.5 group-hover:text-[var(--accent-blue)] transition-colors" style={{ color: "#fafafa" }}>{module.title}</h4>
-                  <p className="text-[12px] mb-5 line-clamp-2 leading-[1.6]" style={{ color: "#71717a" }}>{module.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px]" style={{ color: "#52525b" }}>{module.usageCount} uses</span>
-                    <button onClick={() => handleStartConversation(module.id, module.title)} disabled={startingChat === module.id} className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-[12px] font-semibold gentle-animation hover:scale-105 disabled:opacity-50" style={{ backgroundColor: "var(--accent-blue)", color: "#fff" }} data-testid={`button-start-chat-${module.id}`}>
-                      {startingChat === module.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <MessageSquare className="w-3 h-3" />}
-                      Chat
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-20 rounded-2xl glass-card">
-              <Layers className="w-10 h-10 mx-auto mb-4" style={{ color: "#27272a" }} />
-              <p className="text-[14px] font-bold mb-2" style={{ color: "#fafafa" }}>No modules available yet</p>
-              <p className="text-[13px] mb-6" style={{ color: "#71717a" }}>Be the first to create one.</p>
-              <button onClick={() => setLocation("/create")} className="text-[13px] px-5 py-2.5 rounded-lg font-semibold" style={{ backgroundColor: "var(--accent-blue)", color: "#fff" }} data-testid="button-create-first">Create Module</button>
-            </div>
-          )
-        )}
-
-        {activeView === "conversations" && (
-          conversations.length > 0 ? (
-            <div className="rounded-2xl overflow-hidden glass-card">
-              {conversations.map((conv, idx) => (
-                <div key={conv.id} className="flex items-center justify-between px-6 py-4 cursor-pointer gentle-animation hover:bg-white/[0.02] group" style={{ borderBottom: idx < conversations.length - 1 ? "1px solid #27272a" : "none" }} onClick={() => setLocation(`/chat/${conv.id}`)} data-testid={`card-conversation-${conv.id}`}>
-                  <div className="flex items-center gap-4">
-                    <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(37,99,235,0.08)", color: "var(--accent-blue)" }}>
-                      <MessageSquare className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-[14px] font-semibold" style={{ color: "#fafafa" }}>{conv.title}</h4>
-                      <div className="flex items-center gap-3 text-[11px] mt-0.5" style={{ color: "#52525b" }}>
-                        <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{timeAgo(conv.updatedAt || conv.createdAt)}</span>
-                        <span>{(conv.messages || []).length} messages</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <ArrowRight className="w-4 h-4" style={{ color: "#3f3f46" }} />
-                    <button onClick={(e) => handleDeleteConversation(conv.id, e)} className="w-8 h-8 flex items-center justify-center rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500/10" style={{ color: "#52525b" }} data-testid={`delete-conv-${conv.id}`}>
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-20 rounded-2xl glass-card">
-              <MessageSquare className="w-10 h-10 mx-auto mb-4" style={{ color: "#27272a" }} />
-              <p className="text-[14px] font-bold mb-2" style={{ color: "#fafafa" }}>No conversations yet</p>
-              <p className="text-[13px] mb-6" style={{ color: "#71717a" }}>Start chatting with a module to see conversations here.</p>
-              <button onClick={() => setActiveView("modules")} className="text-[13px] px-5 py-2.5 rounded-lg font-semibold" style={{ backgroundColor: "var(--accent-blue)", color: "#fff" }} data-testid="button-browse-modules">Browse Modules</button>
-            </div>
-          )
-        )}
-
-        {activeView === "my-modules" && (
-          <div>
-            <div className="flex justify-end mb-6">
-              <button onClick={() => setLocation("/create")} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-[13px] font-semibold gentle-animation hover:scale-105" style={{ backgroundColor: "var(--accent-blue)", color: "#fff" }} data-testid="button-create-new">
-                <Plus className="w-4 h-4" /> Create Module
-              </button>
-            </div>
-            {myModules.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                {myModules.map((module, i) => (
-                  <div key={module.id} className="group p-6 rounded-2xl glass-card gentle-animation hover:elevated-shadow" data-testid={`card-my-module-${module.id}`}>
-                    <div className="flex items-start justify-between mb-3">
-                      <h4 className="text-[15px] font-bold" style={{ color: "#fafafa" }}>{module.title}</h4>
-                      <span className="text-[10px] px-2.5 py-0.5 rounded-full font-medium" style={{ color: module.isPublic ? "var(--accent-emerald)" : "#52525b", border: `1px solid ${module.isPublic ? "rgba(5,150,105,0.2)" : "#27272a"}` }}>
-                        {module.isPublic ? "Public" : "Private"}
-                      </span>
-                    </div>
-                    <p className="text-[12px] mb-4 leading-[1.6]" style={{ color: "#71717a" }}>{module.description}</p>
-                    <div className="flex items-center justify-between text-[11px]" style={{ color: "#52525b" }}>
-                      <span>{module.usageCount} uses</span>
-                      {(module as any).provider && <span>{(module as any).provider}/{(module as any).model}</span>}
-                    </div>
-                  </div>
-                ))}
-              </div>
+      <section className="layer-section" style={{ paddingTop: 0, paddingBottom: "2rem" }}>
+        <div className="layer-container">
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+              gap: "1px",
+              background: "var(--bone-edge)",
+              border: "1px solid var(--bone-edge)",
+              borderRadius: "var(--r-3)",
+              overflow: "hidden",
+            }}
+          >
+            <StatCard
+              label="Conversations"
+              value={conversations.length}
+              icon={<MessageSquare className="w-4 h-4" />}
+              onClick={() => setLocation("/history")}
+            />
+            <StatCard
+              label="Saved modules"
+              value={favorites.length}
+              icon={<Heart className="w-4 h-4" />}
+              onClick={() => setLocation("/library")}
+            />
+            <StatCard
+              label="Credits"
+              value={credits}
+              icon={<CreditCard className="w-4 h-4" />}
+              accent
+              onClick={() => setLocation("/billing")}
+            />
+            {isCreator ? (
+              <StatCard
+                label="Studio"
+                value="Open"
+                icon={<Sparkles className="w-4 h-4" />}
+                accentInk
+                onClick={() => setLocation("/studio")}
+              />
             ) : (
-              <div className="text-center py-20 rounded-2xl glass-card">
-                <Plus className="w-10 h-10 mx-auto mb-4" style={{ color: "#27272a" }} />
-                <p className="text-[14px] font-bold mb-2" style={{ color: "#fafafa" }}>No modules created yet</p>
-                <p className="text-[13px]" style={{ color: "#71717a" }}>Package your expertise into an AI module.</p>
-              </div>
+              <StatCard
+                label="Become a creator"
+                value="→"
+                icon={<Sparkles className="w-4 h-4" />}
+                accentInk
+                onClick={() => setLocation("/profile")}
+              />
             )}
           </div>
-        )}
+        </div>
+      </section>
+
+      <section className="layer-section layer-divider" style={{ paddingTop: "1.5rem", paddingBottom: "5rem" }}>
+        <div className="layer-container">
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: "2rem" }} className="dash-grid">
+            {/* LEFT: recent chats */}
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+                <span className="eyebrow"><span className="num">R</span> Recent chats</span>
+                {conversations.length > 5 && (
+                  <button onClick={() => setLocation("/history")} className="btn btn-ghost" style={{ padding: 0, fontSize: "0.85rem" }}>
+                    See all <ArrowRight className="w-3.5 h-3.5 arrow" />
+                  </button>
+                )}
+              </div>
+              {recentConvs.length === 0 ? (
+                <EmptyCard
+                  icon={<MessageSquare className="w-8 h-8" />}
+                  title="No chats yet"
+                  desc="Browse modules built by verified experts and start your first conversation."
+                  cta={{ label: "Browse modules", onClick: () => setLocation("/explore") }}
+                />
+              ) : (
+                <div
+                  style={{
+                    background: "var(--bone-light)",
+                    border: "1px solid var(--bone-edge)",
+                    borderRadius: "var(--r-3)",
+                    overflow: "hidden",
+                  }}
+                >
+                  {recentConvs.map((conv, idx) => (
+                    <div
+                      key={conv.id}
+                      onClick={() => setLocation(`/chat/${conv.id}`)}
+                      data-testid={`recent-conv-${conv.id}`}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "0.95rem 1.25rem",
+                        borderBottom: idx < recentConvs.length - 1 ? "1px solid var(--bone-edge)" : "none",
+                        cursor: "pointer",
+                        transition: "background 0.15s var(--ease)",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bone-deep)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", minWidth: 0 }}>
+                        <div className="band-tier" style={{ width: 28, height: 28, fontSize: "0.7rem", flexShrink: 0 }}>
+                          {(conv.title || "??").slice(0, 2).toUpperCase()}
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <h4 style={{ fontSize: "0.95rem", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {conv.title || "Untitled chat"}
+                          </h4>
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "0.85rem",
+                              marginTop: 2,
+                              fontSize: "0.7rem",
+                              fontFamily: "var(--font-mono)",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.1em",
+                              color: "var(--ink-4)",
+                            }}
+                          >
+                            <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                              <Clock className="w-3 h-3" /> {timeAgo(conv.updatedAt || conv.createdAt)}
+                            </span>
+                            <span>{(conv.messages || []).length} msgs</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexShrink: 0 }}>
+                        <button
+                          onClick={(e) => handleDeleteConversation(conv.id, e)}
+                          aria-label="Delete"
+                          style={{ background: "transparent", border: 0, padding: 6, cursor: "pointer", color: "var(--ink-4)", borderRadius: 4 }}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                        <ArrowRight className="w-4 h-4" style={{ color: "var(--ink-4)" }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* RIGHT: saved modules */}
+            <aside>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+                <span className="eyebrow"><span className="num">L</span> Library</span>
+                {favorites.length > 0 && (
+                  <button onClick={() => setLocation("/library")} className="btn btn-ghost" style={{ padding: 0, fontSize: "0.85rem" }}>
+                    All <ArrowRight className="w-3.5 h-3.5 arrow" />
+                  </button>
+                )}
+              </div>
+              {favorites.length === 0 ? (
+                <div
+                  style={{
+                    background: "var(--bone-light)",
+                    border: "1px dashed var(--bone-edge)",
+                    borderRadius: "var(--r-3)",
+                    padding: "1.5rem",
+                    textAlign: "center",
+                  }}
+                >
+                  <Heart className="w-6 h-6" style={{ margin: "0 auto 0.6rem", color: "var(--ink-4)" }} />
+                  <p style={{ fontSize: "0.9rem", color: "var(--ink-3)", marginBottom: "0.85rem" }}>
+                    No saved modules yet.
+                  </p>
+                  <button className="btn btn-outline" onClick={() => setLocation("/explore")}>
+                    <Compass className="w-3.5 h-3.5" /> Explore
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                  {favorites.slice(0, 4).map((m, i) => {
+                    const band = BANDS[i % BANDS.length];
+                    const initials = m.title.slice(0, 2).toUpperCase();
+                    return (
+                      <div
+                        key={m.id}
+                        onClick={() => setLocation(`/modules/${m.id}`)}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.75rem",
+                          padding: "0.75rem",
+                          background: "var(--bone-light)",
+                          border: "1px solid var(--bone-edge)",
+                          borderRadius: 8,
+                          cursor: "pointer",
+                          transition: "border-color 0.15s var(--ease)",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.borderColor = "var(--ink)")}
+                        onMouseLeave={(e) => (e.currentTarget.style.borderColor = "var(--bone-edge)")}
+                      >
+                        <div className={`module-band ${band}`} style={{ width: 36, height: 36, padding: 0, borderRadius: 6, alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <span className="band-tier" style={{ width: 26, height: 26, fontSize: "0.65rem" }}>
+                            {initials}
+                          </span>
+                        </div>
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <h4
+                            style={{
+                              fontSize: "0.9rem",
+                              fontWeight: 600,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {m.title}
+                          </h4>
+                          <p
+                            style={{
+                              fontSize: "0.7rem",
+                              fontFamily: "var(--font-mono)",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.1em",
+                              color: "var(--ink-4)",
+                              marginTop: 2,
+                            }}
+                          >
+                            {m.usageCount} uses
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </aside>
+          </div>
+
+          <style>{`
+            @media (max-width: 900px) {
+              .dash-grid { grid-template-columns: 1fr !important; }
+            }
+          `}</style>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  icon,
+  accent,
+  accentInk,
+  onClick,
+}: {
+  label: string;
+  value: string | number;
+  icon: React.ReactNode;
+  accent?: boolean;
+  accentInk?: boolean;
+  onClick: () => void;
+}) {
+  const bg = accentInk ? "var(--ink)" : accent ? "var(--acid)" : "var(--bone-light)";
+  const fg = accentInk ? "var(--bone)" : "var(--ink)";
+  const labelColor = accentInk ? "var(--acid)" : accent ? "var(--ink-2)" : "var(--ink-4)";
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        textAlign: "left",
+        background: bg,
+        color: fg,
+        padding: "1.5rem 1.25rem",
+        border: 0,
+        cursor: "pointer",
+        fontFamily: "inherit",
+        transition: "transform 0.15s var(--ease)",
+      }}
+      onMouseEnter={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
+      onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "0.6rem",
+        }}
+      >
+        <span
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "0.7rem",
+            textTransform: "uppercase",
+            letterSpacing: "0.14em",
+            color: labelColor,
+          }}
+        >
+          {label}
+        </span>
+        <span style={{ color: labelColor }}>{icon}</span>
       </div>
+      <p style={{ fontSize: "var(--t-3)", fontWeight: 600, letterSpacing: "-0.04em", lineHeight: 1 }}>{value}</p>
+    </button>
+  );
+}
+
+function EmptyCard({
+  icon,
+  title,
+  desc,
+  cta,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  cta: { label: string; onClick: () => void };
+}) {
+  return (
+    <div
+      style={{
+        background: "var(--bone-light)",
+        border: "1px dashed var(--bone-edge)",
+        borderRadius: "var(--r-3)",
+        padding: "3rem 2rem",
+        textAlign: "center",
+      }}
+    >
+      <div style={{ display: "inline-flex", marginBottom: "1rem", color: "var(--ink-4)" }}>{icon}</div>
+      <p style={{ fontSize: "1.05rem", fontWeight: 600, marginBottom: "0.5rem" }}>{title}</p>
+      <p style={{ fontSize: "0.92rem", color: "var(--ink-3)", marginBottom: "1.5rem", maxWidth: "44ch", margin: "0 auto 1.5rem" }}>
+        {desc}
+      </p>
+      <button className="btn btn-acid" onClick={cta.onClick}>
+        {cta.label} <span className="arrow">→</span>
+      </button>
     </div>
   );
 }

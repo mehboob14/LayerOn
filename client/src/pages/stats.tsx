@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "wouter";
 import { api, type Module } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, TrendingUp, Heart } from "lucide-react";
+import { TrendingUp, Heart } from "lucide-react";
+import { LayerNav } from "@/components/layer/LayerNav";
 
 export default function StatsPage() {
-  const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const [modules, setModules] = useState<Module[]>([]);
+  const [, setModules] = useState<Module[]>([]);
   const [stats, setStats] = useState({ totalModules: 0, totalUses: 0, totalFavorites: 0, topModule: null as Module | null });
   const [loading, setLoading] = useState(true);
 
@@ -20,63 +19,92 @@ export default function StatsPage() {
         const totalFavorites = (myModules || []).reduce((sum, m) => sum + m.favoriteCount, 0);
         const topModule = (myModules || []).sort((a, b) => b.usageCount - a.usageCount)[0] || null;
         setStats({ totalModules: (myModules || []).length, totalUses, totalFavorites, topModule });
-      } catch (error: any) { toast({ title: "Error", description: error.message, variant: "destructive" }); }
-      finally { setLoading(false); }
+      } catch (error: any) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } finally {
+        setLoading(false);
+      }
     };
     loadStats();
   }, [toast]);
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ position: "relative", zIndex: 1 }}>
-      <p style={{ color: "#52525b" }}>Loading stats...</p>
-    </div>
-  );
-
   return (
-    <div className="min-h-screen" style={{ position: "relative", zIndex: 1 }}>
-      <header className="sticky top-0 z-40 glass-navbar">
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center gap-3">
-          <button onClick={() => setLocation("/dashboard")} className="flex items-center justify-center w-8 h-8 rounded-lg gentle-animation hover:bg-white/5" style={{ color: "#71717a" }}>
-            <ArrowLeft className="w-4 h-4" />
-          </button>
-          <div>
-            <span className="text-lg font-black" style={{ color: "#fafafa" }}>Statistics</span>
-            <p className="text-xs" style={{ color: "#71717a" }}>Performance of your modules</p>
-          </div>
-        </div>
-      </header>
+    <div style={{ background: "var(--bone)", minHeight: "100vh", color: "var(--ink)" }}>
+      <LayerNav />
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-          {[
-            { label: "Total Modules", value: stats.totalModules, color: "var(--accent-blue)" },
-            { label: "Total Uses", value: stats.totalUses, color: "var(--accent-emerald)" },
-            { label: "Total Favorites", value: stats.totalFavorites, color: "var(--accent-purple)" },
-          ].map((s) => (
-            <div key={s.label} className="rounded-2xl p-6 glass-card">
-              <p className="text-xs font-semibold mb-2" style={{ color: "#52525b" }}>{s.label}</p>
-              <p className="text-3xl font-black" style={{ color: s.color }}>{s.value}</p>
-            </div>
-          ))}
-        </div>
+      <section className="layer-section layer-divider" style={{ paddingTop: "3rem", paddingBottom: "5rem" }}>
+        <div className="layer-container">
+          <span className="eyebrow"><span className="num">S</span> Statistics</span>
+          <h2 style={{ fontSize: "var(--t-5)", marginBottom: "1rem" }}>
+            Your modules, <span className="it">in numbers.</span>
+          </h2>
+          <p className="lead">Performance snapshot of every module you've published.</p>
 
-        {stats.topModule && (
-          <div className="rounded-2xl p-8 glass-card">
-            <h2 className="text-lg font-black mb-4" style={{ color: "#fafafa" }}>Top Module</h2>
-            <div className="p-5 rounded-xl" style={{ backgroundColor: "#18181b", border: "1px solid #27272a" }}>
-              <h3 className="text-base font-bold mb-3" style={{ color: "#fafafa" }}>{stats.topModule.title}</h3>
-              <div className="flex gap-6 text-sm">
-                <span className="flex items-center gap-2" style={{ color: "var(--accent-emerald)" }}>
-                  <TrendingUp className="w-4 h-4" />{stats.topModule.usageCount} uses
-                </span>
-                <span className="flex items-center gap-2" style={{ color: "#52525b" }}>
-                  <Heart className="w-4 h-4" />{stats.topModule.favoriteCount} favorites
-                </span>
+          {loading ? (
+            <p style={{ color: "var(--ink-4)", marginTop: "2rem" }}>Loading stats…</p>
+          ) : (
+            <>
+              <div className="five-grid">
+                {[
+                  { n: "01", label: "Total Modules", value: stats.totalModules },
+                  { n: "02", label: "Total Uses", value: stats.totalUses },
+                  { n: "03", label: "Total Favorites", value: stats.totalFavorites },
+                ].map((s) => (
+                  <div key={s.label} className="five-row">
+                    <div className="five-num">{s.n}</div>
+                    <h4>{s.label}</h4>
+                    <p style={{ fontSize: "2.5rem", fontWeight: 600, letterSpacing: "-0.04em", color: "var(--ink)", lineHeight: 1 }}>
+                      {s.value}
+                    </p>
+                  </div>
+                ))}
               </div>
-            </div>
-          </div>
-        )}
-      </div>
+
+              {stats.topModule && (
+                <div
+                  style={{
+                    marginTop: "3rem",
+                    padding: "2rem",
+                    borderRadius: "var(--r-3)",
+                    background: "var(--ink)",
+                    color: "var(--bone)",
+                  }}
+                >
+                  <span
+                    className="eyebrow"
+                    style={{ color: "rgba(244,241,234,0.55)", marginBottom: "1rem" }}
+                  >
+                    <span className="num" style={{ color: "var(--acid)" }}>★</span> Top performer
+                  </span>
+                  <h3 style={{ fontSize: "1.75rem", color: "var(--bone)", marginBottom: "1rem" }}>
+                    {stats.topModule.title}
+                  </h3>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "2rem",
+                      fontFamily: "var(--font-mono)",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.12em",
+                      fontSize: "0.75rem",
+                      color: "rgba(244,241,234,0.7)",
+                    }}
+                  >
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      <TrendingUp className="w-4 h-4" style={{ color: "var(--acid)" }} />
+                      {stats.topModule.usageCount} uses
+                    </span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                      <Heart className="w-4 h-4" style={{ color: "var(--coral)" }} />
+                      {stats.topModule.favoriteCount} favorites
+                    </span>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </section>
     </div>
   );
 }

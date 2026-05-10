@@ -6,9 +6,13 @@
   "scripts": {
     "dev:client": "vite dev --port 5173",
     "dev:backend": "uvicorn Backend.main:app --host 0.0.0.0 --port 8000 --reload",
-    "dev": "concurrently \"npm run dev:client\" \"npm run dev:backend\"",
+    "dev:worker": "celery -A Backend.celery_app:celery worker --pool=solo --loglevel=info",
+    "dev:beat": "celery -A Backend.celery_app:celery beat --loglevel=info",
+    "dev": "concurrently -n api,worker,beat,web -c blue,magenta,yellow,green \"npm run dev:backend\" \"npm run dev:worker\" \"npm run dev:beat\" \"npm run dev:client\"",
     "build": "vite build",
     "start": "uvicorn Backend.main:app --host 0.0.0.0 --port 8000",
+    "worker": "celery -A Backend.celery_app:celery worker --loglevel=info",
+    "beat": "celery -A Backend.celery_app:celery beat --loglevel=info",
     "check": "tsc",
     "db:push": "drizzle-kit push"
   },

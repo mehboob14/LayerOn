@@ -4,7 +4,7 @@ from __future__ import annotations
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -16,8 +16,8 @@ from ..schemas import (
     WebIdentityRequest,
 )
 from ..scrapers import SUPPORTED_PLATFORMS
+from ..tasks.creator_sync import sync_source as sync_source_task
 from ..utils.auth import get_current_user
-from ..utils.creator_kb import sync_source
 from ..utils.serializers import creator_chunk_to_dict, creator_source_to_dict
 from ..utils.web_identity import discover_identity, is_enabled as identity_enabled
 
@@ -61,7 +61,6 @@ def list_sources(db: Session = Depends(get_db), user: User = Depends(get_current
 @router.post("/sources", status_code=201)
 def add_source(
     req: CreatorSourceCreate,
-    background: BackgroundTasks,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
@@ -95,7 +94,7 @@ def add_source(
     db.commit()
     db.refresh(source)
 
-    background.add_task(sync_source, source.id)
+    sync_source_task.delay(source.id)
     return creator_source_to_dict(source)
 
 
@@ -136,7 +135,6 @@ def delete_source(
 @router.post("/sources/{source_id}/sync")
 def trigger_sync(
     source_id: str,
-    background: BackgroundTasks,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
@@ -145,8 +143,8 @@ def trigger_sync(
     source.status = "pending"
     source.last_error = None
     db.commit()
-    background.add_task(sync_source, source.id)
-    return {"queued": True, "sourceId": source.id}
+    result = sync_source_task.delay(source.id)
+    return {"queued": True, "sourceId": source.id, "taskId": result.id}
 
 
 @router.get("/sources/{source_id}/chunks")
